@@ -1089,9 +1089,6 @@
                 }
                 const nav = imgs.length > 1 ? '<div class="gallery-nav"><button class="prev" onclick="event.stopPropagation();prevImg(this)">‹</button><button class="next" onclick="event.stopPropagation();nextImg(this)">›</button></div>' : '';
                 const badge = hasAff ? '<span class="badge badge-aff">✓ קישור</span>' : '';
-                const btnClass = hasAff ? 'buy-btn' : 'buy-btn btn-secondary';
-                const btnText = hasAff ? '🛒 קנו בעליבאבא' : 'צפו באלבום';
-                const btnLink = p.l || '#';
                 const priceHtml = p.p ? '<div class="price">' + p.p + '</div>' : '';
                 html += '<div class="product-card visible" style="animation-delay:' + Math.min(ci * 0.03, 0.6) + 's">' +
                     '<div class="card-gallery" onclick="openLightbox(' + pi + ')" style="cursor:pointer">' +
@@ -1100,7 +1097,7 @@
                     badge + '</div>' +
                     '<div class="card-info"><h3 class="card-title">' + p.t + '</h3>' +
                     priceHtml +
-                    '<a href="' + btnLink + '" target="_blank" rel="noopener" class="' + btnClass + '" onclick="event.stopPropagation();window.open(\'' + btnLink + '\',\'_blank\');return false;">' + btnText + '</a></div></div>';
+                    '<div class="buy-btn" onclick="openLightbox(' + pi + ')">👁 צפו בפריט</div></div></div>';
             });
             grid.innerHTML = html;
         }
