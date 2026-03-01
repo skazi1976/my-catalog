@@ -915,6 +915,19 @@
         </div>
     </div>
 
+    <!-- Push Notifications Banner -->
+    <div class="install-banner" id="pushBanner">
+        <div class="install-banner-inner" style="border-color:var(--gold);background:linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,107,0,0.08));">
+            <button class="install-banner-close" onclick="dismissPush()">✕</button>
+            <div class="install-banner-icon">🔔</div>
+            <div class="install-banner-text">
+                <h3 style="color:var(--gold);">הפעילו התראות!</h3>
+                <p>נעדכן אתכם כשמותגים חדשים נוספים לקטלוג - Nike, Dior, LV ועוד. לא תפספסו שום דבר!</p>
+            </div>
+            <button class="install-banner-btn" id="pushBtn" onclick="enablePush()" style="background:linear-gradient(135deg,#FFD700,#FF8C00);">🔔 הפעלה</button>
+        </div>
+    </div>
+
     <div class="controls">
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 חפש מוצר..." oninput="filterProducts()">
         <select class="sort-select" onchange="setSort(this.value)">
@@ -1394,19 +1407,23 @@
                 });
             }
 
-            // Load scripts sequentially: app first, then database
+            // Load scripts sequentially: app, database, messaging
             loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
                 .then(function() {
                     return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
                 })
                 .then(function() {
+                    return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+                })
+                .then(function() {
                     var app = firebase.initializeApp(cfg);
                     var db = firebase.database();
+
+                    // === Presence (online counter) ===
                     var myId = 'user_' + Math.random().toString(36).substr(2, 9);
                     var myRef = db.ref('presence/' + myId);
                     var countRef = db.ref('presence');
 
-                    // Set presence on connect
                     db.ref('.info/connected').on('value', function(snap) {
                         if (snap.val() === true) {
                             myRef.set(true);
@@ -1414,14 +1431,35 @@
                         }
                     });
 
-                    // Listen for count changes
                     countRef.on('value', function(snap) {
                         var count = snap.numChildren();
                         document.getElementById('onlineCount').textContent = count;
                     });
 
-                    // Heartbeat - keep alive
                     setInterval(function() { myRef.set(true); }, 60000);
+
+                    // === FCM Push Notifications ===
+                    window._firebaseDB = db;
+                    try {
+                        var messaging = firebase.messaging();
+                        window._fcmMessaging = messaging;
+
+                        // Handle foreground messages
+                        messaging.onMessage(function(payload) {
+                            var title = (payload.notification && payload.notification.title) || 'קטלוג מותגים';
+                            var body = (payload.notification && payload.notification.body) || 'יש מוצרים חדשים!';
+                            if (Notification.permission === 'granted') {
+                                new Notification(title, {
+                                    body: body,
+                                    icon: './icon-192.png',
+                                    dir: 'rtl',
+                                    lang: 'he'
+                                });
+                            }
+                        });
+                    } catch(fcmErr) {
+                        console.warn('FCM init skipped:', fcmErr);
+                    }
                 })
                 .catch(function(e) {
                     console.error('Firebase load error:', e);
@@ -1582,6 +1620,99 @@
             installBanner.classList.remove('show');
             localStorage.setItem('install-dismissed', '1');
         });
+
+        // === Push Notifications Banner ===
+        var pushBanner = document.getElementById('pushBanner');
+
+        (function() {
+            // Hide if already subscribed, dismissed, or not supported
+            if (localStorage.getItem('push-subscribed') || localStorage.getItem('push-dismissed')) {
+                pushBanner.style.display = 'none';
+                return;
+            }
+            if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+                pushBanner.style.display = 'none';
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                pushBanner.style.display = 'none';
+                // Already granted, try to register token silently
+                setTimeout(function() { registerFCMToken(); }, 3000);
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                pushBanner.style.display = 'none';
+                return;
+            }
+            // Show push banner after 2 seconds
+            setTimeout(function() {
+                pushBanner.classList.add('show');
+            }, 2000);
+        })();
+
+        function dismissPush() {
+            pushBanner.classList.remove('show');
+            localStorage.setItem('push-dismissed', '1');
+        }
+
+        function enablePush() {
+            var btn = document.getElementById('pushBtn');
+            btn.textContent = '⏳ רגע...';
+            btn.style.pointerEvents = 'none';
+
+            Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                    btn.textContent = '✓ הופעלו!';
+                    pushBanner.classList.remove('show');
+                    localStorage.setItem('push-subscribed', '1');
+                    setTimeout(function() {
+                        pushBanner.style.display = 'none';
+                    }, 1000);
+                    registerFCMToken();
+                } else {
+                    btn.textContent = '🔔 הפעלה';
+                    btn.style.pointerEvents = 'auto';
+                    if (permission === 'denied') {
+                        pushBanner.classList.remove('show');
+                        localStorage.setItem('push-dismissed', '1');
+                    }
+                }
+            });
+        }
+
+        function registerFCMToken() {
+            if (!window._fcmMessaging || !window._firebaseDB) return;
+            try {
+                var messaging = window._fcmMessaging;
+                var db = window._firebaseDB;
+                var vapidKey = 'BCD2PUE0F0ltnHF8O7QDuxyVJ6AsfJsgRB6s9biFxBeyW5uSqkDmiC8TO_WQbshJ3EEqhEvroeG7SCb-O7jtxOuY';
+
+                navigator.serviceWorker.register('./firebase-messaging-sw.js')
+                    .then(function(registration) {
+                        return messaging.getToken({
+                            vapidKey: vapidKey,
+                            serviceWorkerRegistration: registration
+                        });
+                    })
+                    .then(function(token) {
+                        if (token) {
+                            // Save token to Realtime Database
+                            var safeKey = token.replace(/[.#$/\[\]]/g, '_');
+                            db.ref('fcm_tokens/' + safeKey).set({
+                                token: token,
+                                timestamp: Date.now(),
+                                userAgent: navigator.userAgent.substring(0, 100)
+                            });
+                            localStorage.setItem('push-subscribed', '1');
+                        }
+                    })
+                    .catch(function(err) {
+                        console.warn('FCM token error:', err);
+                    });
+            } catch(e) {
+                console.warn('FCM registration error:', e);
+            }
+        }
 
         // Register Service Worker (PWA)
         if ('serviceWorker' in navigator) {

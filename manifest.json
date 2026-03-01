@@ -10,6 +10,7 @@
   "dir": "rtl",
   "lang": "he",
   "orientation": "portrait",
+  "gcm_sender_id": "103953800507",
   "icons": [
     {
       "src": "icon-192.png",
