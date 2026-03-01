@@ -847,9 +847,12 @@
     </div>
 
     <div class="footer">
-        <div style="margin-bottom:12px;">
+        <div style="margin-bottom:12px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
             <span style="background:var(--surface2);padding:8px 16px;border-radius:20px;font-size:14px;">
-                👥 מבקרים: <span id="visitorCount" style="color:var(--accent);font-weight:600;">...</span>
+                🟢 כרגע באתר: <span id="onlineCount" style="color:var(--accent);font-weight:600;">...</span>
+            </span>
+            <span style="background:var(--surface2);padding:8px 16px;border-radius:20px;font-size:14px;">
+                👥 סה״כ מבקרים: <span id="visitorCount" style="color:var(--accent);font-weight:600;">...</span>
             </span>
         </div>
         Built with ❤️ | 2304 מוצרים
@@ -919,6 +922,16 @@
     </div>
     
     <script>
+        // Firebase config - fill in your details from Firebase Console
+        window.FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT"
+        };
+        // Set to null to disable real-time counter:
+        // window.FIREBASE_CONFIG = null;
+
         let PRODUCTS = [];
         let currentSort = 'default';
         let currentBrand = '';
@@ -1226,7 +1239,7 @@
             }
         });
         
-        // Visitor counter
+        // Total visitor counter
         (function() {
             try {
                 fetch('https://api.counterapi.dev/v1/skazi1976-catalog/visits/up')
@@ -1239,6 +1252,58 @@
                     });
             } catch(e) {
                 document.getElementById('visitorCount').textContent = '—';
+            }
+        })();
+
+        // Real-time online users (Firebase)
+        (function() {
+            const FIREBASE_CONFIG = window.FIREBASE_CONFIG;
+            if (!FIREBASE_CONFIG) {
+                document.getElementById('onlineCount').textContent = '—';
+                return;
+            }
+            const scripts = [
+                'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
+                'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js'
+            ];
+            let loaded = 0;
+            scripts.forEach(src => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = () => {
+                    loaded++;
+                    if (loaded === scripts.length) initPresence();
+                };
+                document.head.appendChild(s);
+            });
+
+            function initPresence() {
+                try {
+                    const app = firebase.initializeApp(FIREBASE_CONFIG);
+                    const db = firebase.database();
+                    const myId = 'user_' + Math.random().toString(36).substr(2, 9);
+                    const myRef = db.ref('presence/' + myId);
+                    const countRef = db.ref('presence');
+
+                    // Set presence on connect
+                    db.ref('.info/connected').on('value', (snap) => {
+                        if (snap.val() === true) {
+                            myRef.set(true);
+                            myRef.onDisconnect().remove();
+                        }
+                    });
+
+                    // Listen for count changes
+                    countRef.on('value', (snap) => {
+                        const count = snap.numChildren();
+                        document.getElementById('onlineCount').textContent = count;
+                    });
+
+                    // Heartbeat - keep alive
+                    setInterval(() => myRef.set(true), 60000);
+                } catch(e) {
+                    document.getElementById('onlineCount').textContent = '—';
+                }
             }
         })();
         
