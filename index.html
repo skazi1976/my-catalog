@@ -932,19 +932,36 @@
                 document.getElementById('grid').innerHTML = '<div class="no-results" style="display:block">שגיאה בטעינת המוצרים</div>';
             });
 
-        // Brand chips - auto-detect from titles
+        // Brand chips - auto-detect from titles (including abbreviations)
+        const BRAND_MAP = {
+            'Nike': ['nike'],
+            'Adidas': ['adidas'],
+            'Jordan': ['jordan'],
+            'Puma': ['puma'],
+            'New Balance': ['new balance', 'nb '],
+            'Yeezy': ['yeezy'],
+            'Gucci': ['gucci'],
+            'Louis Vuitton': ['louis vuitton', 'lv '],
+            'Balenciaga': ['balenciaga'],
+            'Dior': ['dior', 'dr '],
+            'The North Face': ['north face', 'tnf '],
+            'Veja': ['veja', 've ']
+        };
+
+        function brandMatch(title, keys) {
+            return keys.some(k => title.includes(k));
+        }
+
         function buildBrandChips() {
-            const brands = ['Nike', 'Adidas', 'Jordan', 'Puma', 'New Balance', 'Yeezy', 'Gucci', 'Louis Vuitton', 'Balenciaga', 'Dior'];
             const counts = {};
-            brands.forEach(b => {
-                const bl = b.toLowerCase();
-                const c = PRODUCTS.filter(p => p.f.includes(bl)).length;
-                if (c > 0) counts[b] = c;
+            Object.entries(BRAND_MAP).forEach(([name, keys]) => {
+                const c = PRODUCTS.filter(p => brandMatch(p.f, keys)).length;
+                if (c > 0) counts[name] = c;
             });
             const container = document.getElementById('brands');
             let html = '';
             Object.entries(counts).sort((a,b) => b[1]-a[1]).forEach(([brand, count]) => {
-                html += '<button class="brand-chip" onclick="toggleBrand(this, \'' + brand.toLowerCase() + '\')">' + brand + ' (' + count + ')</button>';
+                html += '<button class="brand-chip" onclick="toggleBrand(this, \'' + brand + '\')">' + brand + ' (' + count + ')</button>';
             });
             container.innerHTML = html;
         }
@@ -1026,7 +1043,7 @@
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
                 const matchSearch = !query || p.f.includes(query);
-                const matchBrand = !currentBrand || p.f.includes(currentBrand);
+                const matchBrand = !currentBrand || brandMatch(p.f, BRAND_MAP[currentBrand] || [currentBrand]);
                 const hasLink = p.a ? 'yes' : 'no';
                 const matchFilter = currentFilter === 'all' || hasLink === currentFilter;
                 if (matchSearch && matchBrand && matchFilter) filteredIndices.push(i);
