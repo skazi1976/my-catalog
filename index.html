@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>קטלוג מוצרים</title>
+    <title>קטלוג מוצרים - נעליים ובגדים במחירי רצפה</title>
+    <meta name="description" content="קטלוג 2304 מוצרים ממותגים במחירי רצפה - נעליים, בגדים ואקססוריז. משלוח ישיר מהמפעל עם קישורי רכישה בעליבאבא.">
+    <link rel="canonical" href="https://skazi1976.github.io/my-catalog/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="קטלוג מוצרים - 2304 פריטים במחירי רצפה">
+    <meta property="og:description" content="נעליים, בגדים ואקססוריז ממותגים במחירים הכי זולים. משלוח ישיר עם קישורי רכישה.">
+    <meta property="og:url" content="https://skazi1976.github.io/my-catalog/">
+    <meta property="og:image" content="https://pub-0ad199860b5a4ce0b3fb483660b8a4ca.r2.dev/images/224892307/001.jpg">
+    <meta property="og:locale" content="he_IL">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="קטלוג מוצרים - 2304 פריטים במחירי רצפה">
+    <meta name="twitter:description" content="נעליים, בגדים ואקססוריז ממותגים במחירים הכי זולים.">
+    <meta name="twitter:image" content="https://pub-0ad199860b5a4ce0b3fb483660b8a4ca.r2.dev/images/224892307/001.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -108,7 +123,85 @@
             color: var(--bg);
             border-color: var(--accent);
         }
-        
+        .sort-select {
+            padding: 12px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'Rubik', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239090a8' viewBox='0 0 16 16'%3E%3Cpath d='M8 12L2 6h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 12px center;
+            padding-left: 32px;
+        }
+        .sort-select:focus {
+            border-color: var(--accent);
+        }
+        .brands {
+            max-width: 1400px;
+            margin: 0 auto 16px;
+            padding: 0 24px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .brands::-webkit-scrollbar { display: none; }
+        .brand-chip {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text2);
+            font-family: 'Rubik', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .brand-chip:hover, .brand-chip.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .back-to-top.show {
+            display: flex;
+        }
+        .back-to-top:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
         .grid {
             max-width: 1400px;
             margin: 0 auto;
@@ -480,6 +573,9 @@
             .logo { font-size: 22px; }
             .stats { gap: 12px; }
             .controls { flex-direction: column; padding: 0 8px; }
+            .brands { padding: 0 8px; }
+            .sort-select { width: 100%; }
+            .back-to-top { bottom: 80px; right: 16px; width: 42px; height: 42px; }
             .card-title { font-size: 11px; }
             .price { font-size: 16px; }
             .buy-btn { padding: 8px; font-size: 11px; }
@@ -698,12 +794,19 @@
     </div>
     
     <div class="controls">
-        <input type="text" class="search-box" placeholder="🔍 חפש מוצר..." oninput="filterProducts()">
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 חפש מוצר..." oninput="filterProducts()">
+        <select class="sort-select" onchange="setSort(this.value)">
+            <option value="default">מיון: ברירת מחדל</option>
+            <option value="price-asc">מחיר: מהזול ליקר ↑</option>
+            <option value="price-desc">מחיר: מהיקר לזול ↓</option>
+        </select>
         <button class="filter-btn active" onclick="setFilter('all', this)">הכל (2304)</button>
         <button class="filter-btn" onclick="setFilter('yes', this)">✅ קישורים (2300)</button>
         <button class="filter-btn" onclick="setFilter('no', this)">⚠ ללא קישור (4)</button>
     </div>
-    
+
+    <div class="brands" id="brands"></div>
+
     <div class="grid" id="grid">
         <div id="loading" style="grid-column:1/-1;text-align:center;padding:60px 20px;">
             <div style="font-size:40px;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block;">⏳</div>
@@ -732,6 +835,7 @@
     </div>
 
     <!-- Share Button -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
     <button class="share-fab" onclick="toggleShare()" title="שתפו">🔗</button>
     <div class="share-menu" id="shareMenu">
         <a href="https://wa.me/?text=%F0%9F%94%A5%20%D7%A7%D7%98%D7%9C%D7%95%D7%92%20%D7%A0%D7%A2%D7%9C%D7%99%D7%99%D7%9D%20%D7%9E%D7%9E%D7%95%D7%AA%D7%92%D7%95%D7%AA%20%D7%91%D7%9E%D7%97%D7%99%D7%A8%D7%99%20%D7%A8%D7%A6%D7%A4%D7%94!%20%F0%9F%91%9F%0Ahttps://skazi1976.github.io/my-catalog/" target="_blank">💬 שתפו בוואטסאפ</a>
@@ -813,17 +917,63 @@
     
     <script>
         let PRODUCTS = [];
+        let currentSort = 'default';
+        let currentBrand = '';
 
-        // Load product data from separate file (cacheable + gzip compressed)
+        // Load product data
         fetch('data.json')
             .then(r => r.json())
             .then(data => {
                 PRODUCTS = data;
+                buildBrandChips();
                 filterProducts();
             })
             .catch(e => {
                 document.getElementById('grid').innerHTML = '<div class="no-results" style="display:block">שגיאה בטעינת המוצרים</div>';
             });
+
+        // Brand chips - auto-detect from titles
+        function buildBrandChips() {
+            const brands = ['Nike', 'Adidas', 'Jordan', 'Puma', 'New Balance', 'Yeezy', 'Gucci', 'Louis Vuitton', 'Balenciaga', 'Dior'];
+            const counts = {};
+            brands.forEach(b => {
+                const bl = b.toLowerCase();
+                const c = PRODUCTS.filter(p => p.f.includes(bl)).length;
+                if (c > 0) counts[b] = c;
+            });
+            const container = document.getElementById('brands');
+            let html = '';
+            Object.entries(counts).sort((a,b) => b[1]-a[1]).forEach(([brand, count]) => {
+                html += '<button class="brand-chip" onclick="toggleBrand(this, \'' + brand.toLowerCase() + '\')">' + brand + ' (' + count + ')</button>';
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleBrand(btn, brand) {
+            if (currentBrand === brand) {
+                currentBrand = '';
+                btn.classList.remove('active');
+            } else {
+                currentBrand = brand;
+                document.querySelectorAll('.brand-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            currentPage = 1;
+            filterProducts();
+        }
+
+        // Sort
+        function setSort(val) {
+            currentSort = val;
+            currentPage = 1;
+            filterProducts();
+        }
+
+        function parsePrice(p) {
+            if (!p.p) return 0;
+            const m = p.p.match(/[0-9]+/);
+            return m ? parseInt(m[0]) : 0;
+        }
 
         // Gallery navigation
         function loadDeferredImages(gallery) {
@@ -871,15 +1021,23 @@
 
         function filterProducts() {
             if (!PRODUCTS.length) return;
-            const query = document.querySelector('.search-box').value.toLowerCase();
+            const query = document.getElementById('searchBox').value.toLowerCase();
 
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
                 const matchSearch = !query || p.f.includes(query);
+                const matchBrand = !currentBrand || p.f.includes(currentBrand);
                 const hasLink = p.a ? 'yes' : 'no';
                 const matchFilter = currentFilter === 'all' || hasLink === currentFilter;
-                if (matchSearch && matchFilter) filteredIndices.push(i);
+                if (matchSearch && matchBrand && matchFilter) filteredIndices.push(i);
             });
+
+            // Sort
+            if (currentSort === 'price-asc') {
+                filteredIndices.sort((a, b) => parsePrice(PRODUCTS[a]) - parsePrice(PRODUCTS[b]));
+            } else if (currentSort === 'price-desc') {
+                filteredIndices.sort((a, b) => parsePrice(PRODUCTS[b]) - parsePrice(PRODUCTS[a]));
+            }
 
             const totalPages = Math.ceil(filteredIndices.length / PER_PAGE) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
@@ -1109,6 +1267,55 @@
                 document.getElementById('shareMenu').classList.remove('open');
             }
         });
+
+        // Back to top
+        window.addEventListener('scroll', () => {
+            document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
+        });
+
+        // Swipe gestures for lightbox
+        (function() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            const overlay = document.getElementById('lightboxOverlay');
+
+            overlay.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+            }, {passive: true});
+
+            overlay.addEventListener('touchend', (e) => {
+                const dx = e.changedTouches[0].screenX - touchStartX;
+                const dy = e.changedTouches[0].screenY - touchStartY;
+                if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+                    // RTL: swipe right = next, swipe left = prev
+                    lbNav(dx > 0 ? 1 : -1);
+                }
+            }, {passive: true});
+        })();
+
+        // Swipe on card galleries
+        document.getElementById('grid').addEventListener('touchstart', (e) => {
+            const gallery = e.target.closest('.card-gallery');
+            if (!gallery) return;
+            gallery._touchX = e.changedTouches[0].screenX;
+        }, {passive: true});
+        document.getElementById('grid').addEventListener('touchend', (e) => {
+            const gallery = e.target.closest('.card-gallery');
+            if (!gallery || gallery._touchX === undefined) return;
+            const dx = e.changedTouches[0].screenX - gallery._touchX;
+            if (Math.abs(dx) > 50) {
+                loadDeferredImages(gallery);
+                const imgs = gallery.querySelectorAll('.gallery-img');
+                const current = gallery.querySelector('.gallery-img.active');
+                const idx = parseInt(current.dataset.idx);
+                current.classList.remove('active');
+                // RTL: swipe right = next, swipe left = prev
+                const newIdx = dx > 0 ? (idx + 1) % imgs.length : (idx - 1 + imgs.length) % imgs.length;
+                imgs[newIdx].classList.add('active');
+            }
+            delete gallery._touchX;
+        }, {passive: true});
     </script>
 </body>
 </html>
