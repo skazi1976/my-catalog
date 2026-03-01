@@ -787,6 +787,105 @@
         .share-menu a:hover {
             background: var(--surface2);
         }
+        /* === PWA Install Banner === */
+        .install-banner {
+            display: none;
+            max-width: 1400px;
+            margin: 16px auto;
+            padding: 0 24px;
+        }
+        .install-banner.show {
+            display: block;
+        }
+        .install-banner-inner {
+            background: linear-gradient(135deg, rgba(0,212,170,0.08), rgba(255,215,0,0.08));
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .install-banner-inner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0,212,170,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .install-banner-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+            animation: pulseIcon 2s ease-in-out infinite;
+        }
+        @keyframes pulseIcon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .install-banner-text {
+            flex: 1;
+        }
+        .install-banner-text h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        .install-banner-text p {
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.5;
+        }
+        .install-banner-btn {
+            flex-shrink: 0;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: var(--bg);
+            border: none;
+            border-radius: 12px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            white-space: nowrap;
+        }
+        .install-banner-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0,212,170,0.4);
+        }
+        .install-banner-close {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.05);
+            color: var(--text2);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .install-banner-close:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        @media (max-width: 768px) {
+            .install-banner { padding: 0 8px; margin: 12px auto; }
+            .install-banner-inner { flex-direction: column; text-align: center; padding: 16px; }
+            .install-banner-icon { font-size: 36px; }
+            .install-banner-text h3 { font-size: 15px; }
+            .install-banner-close { top: 6px; left: 6px; }
+        }
     </style>
 </head>
 <body>
@@ -802,7 +901,20 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- PWA Install Banner -->
+    <div class="install-banner" id="installBanner">
+        <div class="install-banner-inner">
+            <button class="install-banner-close" onclick="dismissInstall()">✕</button>
+            <div class="install-banner-icon">📲</div>
+            <div class="install-banner-text">
+                <h3>התקינו את האפליקציה שלנו!</h3>
+                <p>קבלו עדכונים על מותגים חדשים שנוספים לקטלוג, גלישה מהירה יותר וגישה ישירה ממסך הטלפון</p>
+            </div>
+            <button class="install-banner-btn" id="installBtn" onclick="installApp()">⬇ התקנה</button>
+        </div>
+    </div>
+
     <div class="controls">
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 חפש מוצר..." oninput="filterProducts()">
         <select class="sort-select" onchange="setSort(this.value)">
@@ -1408,6 +1520,68 @@
             }
             delete gallery._touchX;
         }, {passive: true});
+
+        // === PWA Install Banner ===
+        var deferredPrompt = null;
+        var installBanner = document.getElementById('installBanner');
+
+        // Check if already dismissed
+        if (localStorage.getItem('install-dismissed')) {
+            installBanner.style.display = 'none';
+        }
+
+        // Listen for beforeinstallprompt (Chrome/Android)
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!localStorage.getItem('install-dismissed')) {
+                installBanner.classList.add('show');
+            }
+        });
+
+        // Also show banner on iOS Safari (no beforeinstallprompt)
+        (function() {
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            var isInStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+            if (isIOS && !isInStandalone && !localStorage.getItem('install-dismissed')) {
+                // Change button text for iOS
+                document.getElementById('installBtn').textContent = '📖 הוראות';
+                installBanner.classList.add('show');
+            }
+        })();
+
+        // Hide if already installed as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+            installBanner.style.display = 'none';
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                // Chrome/Android: trigger native install prompt
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(choice) {
+                    if (choice.outcome === 'accepted') {
+                        installBanner.classList.remove('show');
+                        localStorage.setItem('install-dismissed', '1');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // iOS: show instructions
+                alert('להתקנה באייפון:\n\n1. לחצו על כפתור השיתוף (ריבוע עם חץ למעלה)\n2. גללו ולחצו \"הוסף למסך הבית\"\n3. לחצו \"הוסף\"');
+            }
+        }
+
+        function dismissInstall() {
+            installBanner.classList.remove('show');
+            localStorage.setItem('install-dismissed', '1');
+        }
+
+        // Hide banner after app is installed
+        window.addEventListener('appinstalled', function() {
+            installBanner.classList.remove('show');
+            localStorage.setItem('install-dismissed', '1');
+        });
 
         // Register Service Worker (PWA)
         if ('serviceWorker' in navigator) {
