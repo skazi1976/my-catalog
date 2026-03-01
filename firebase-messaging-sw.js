@@ -3,12 +3,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-    apiKey: "AIzaSyBVQ8IxgDCMFOVKcOCMjXjrU-3VsB5VMWE",
-    authDomain: "studiolab-31e28.firebaseapp.com",
-    projectId: "studiolab-31e28",
-    storageBucket: "studiolab-31e28.firebasestorage.app",
-    messagingSenderId: "930498498498",
-    appId: "1:930498498498:web:6e2b6b6e6a7f21d7ea4aee"
+    apiKey: "AIzaSyC_kzJSCqPM09v5FeIXrMQbvuBQUlEKiNg",
+    authDomain: "studiolab-1b0fd.firebaseapp.com",
+    projectId: "studiolab-1b0fd",
+    storageBucket: "studiolab-1b0fd.firebasestorage.app",
+    messagingSenderId: "699467626495",
+    appId: "1:699467626495:web:9b67989481975f9c94d9ca"
 });
 
 const messaging = firebase.messaging();
