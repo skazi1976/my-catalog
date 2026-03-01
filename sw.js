@@ -1,5 +1,49 @@
-// Service Worker - Cache for offline & speed
-const CACHE_NAME = 'catalog-v1';
+// Service Worker - Cache + Firebase Cloud Messaging
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+// === Firebase Messaging ===
+firebase.initializeApp({
+    apiKey: "AIzaSyC_kzJSCqPM09v5FeIXrMQbvuBQUlEKiNg",
+    authDomain: "studiolab-1b0fd.firebaseapp.com",
+    projectId: "studiolab-1b0fd",
+    storageBucket: "studiolab-1b0fd.firebasestorage.app",
+    messagingSenderId: "699467626495",
+    appId: "1:699467626495:web:9b67989481975f9c94d9ca"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+    const title = payload.notification?.title || 'קטלוג מותגים';
+    const options = {
+        body: payload.notification?.body || 'יש מוצרים חדשים בקטלוג!',
+        icon: './icon-192.png',
+        badge: './icon-192.png',
+        dir: 'rtl',
+        lang: 'he',
+        data: { url: './' }
+    };
+    self.registration.showNotification(title, options);
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const url = event.notification.data?.url || './';
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (const client of windowClients) {
+                if (client.url.includes('my-catalog') && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            return clients.openWindow(url);
+        })
+    );
+});
+
+// === Caching ===
+const CACHE_NAME = 'catalog-v2';
 const PRECACHE = [
     './',
     './index.html',
@@ -9,7 +53,6 @@ const PRECACHE = [
     'https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap'
 ];
 
-// Install: precache core files
 self.addEventListener('install', (e) => {
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE))
@@ -17,7 +60,6 @@ self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keys) => Promise.all(
@@ -27,17 +69,11 @@ self.addEventListener('activate', (e) => {
     self.clients.claim();
 });
 
-// Fetch: Network first for HTML/JSON, Cache first for images
 self.addEventListener('fetch', (e) => {
     const url = new URL(e.request.url);
-
-    // Skip non-GET requests
     if (e.request.method !== 'GET') return;
+    if (url.hostname.includes('firebase') || url.hostname.includes('counterapi') || url.hostname.includes('gstatic')) return;
 
-    // Skip Firebase and analytics
-    if (url.hostname.includes('firebase') || url.hostname.includes('counterapi')) return;
-
-    // Images: Cache first
     if (url.hostname.includes('r2.dev') || e.request.destination === 'image') {
         e.respondWith(
             caches.match(e.request).then((cached) => {
@@ -54,7 +90,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // HTML/JSON/Other: Network first, fallback to cache
     e.respondWith(
         fetch(e.request).then((response) => {
             if (response.ok) {
