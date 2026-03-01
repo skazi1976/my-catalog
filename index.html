@@ -345,7 +345,10 @@
             border-radius: 12px;
             font-weight: 600;
             font-size: 14px;
-            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         .buy-btn:hover {
             transform: scale(1.02);
@@ -1097,7 +1100,7 @@
                     badge + '</div>' +
                     '<div class="card-info"><h3 class="card-title">' + p.t + '</h3>' +
                     priceHtml +
-                    '<a href="' + btnLink + '" target="_blank" class="' + btnClass + '">' + btnText + '</a></div></div>';
+                    '<a href="' + btnLink + '" target="_blank" rel="noopener" class="' + btnClass + '" onclick="event.stopPropagation();window.open(\'' + btnLink + '\',\'_blank\');return false;">' + btnText + '</a></div></div>';
             });
             grid.innerHTML = html;
         }
@@ -1168,13 +1171,13 @@
             const btn = document.getElementById('lbBuyBtn');
             const noLink = document.getElementById('lbNoLink');
             
+            btn.href = link;
+            btn.onclick = function(e) { e.preventDefault(); window.open(link, '_blank'); };
             if (hasAffiliate) {
-                btn.href = link;
                 btn.textContent = '🛒 קנו בעליבאבא';
                 btn.className = 'lb-buy-btn';
                 noLink.style.display = 'none';
             } else {
-                btn.href = link;
                 btn.textContent = '📂 צפו באלבום המקורי';
                 btn.className = 'lb-buy-btn secondary';
                 noLink.style.display = 'block';
