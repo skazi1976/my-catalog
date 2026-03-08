@@ -958,6 +958,25 @@
         </div>
     </div>
 
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/972502373019?text=%D7%94%D7%99%D7%99%20%F0%9F%91%8B%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%A7%D7%98%D7%9C%D7%95%D7%92%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A4%D7%A8%D7%98%D7%99%D7%9D!" target="_blank" id="floatWhatsApp" style="
+        position:fixed;bottom:24px;left:24px;z-index:9999;
+        width:60px;height:60px;border-radius:50%;
+        background:linear-gradient(135deg,#25D366,#128C7E);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 4px 20px rgba(37,211,102,0.5);
+        text-decoration:none;font-size:30px;
+        transition:transform 0.3s,box-shadow 0.3s;
+        animation:waPulse 2s infinite;
+    " title="דברו איתנו בוואטסאפ">💬</a>
+    <style>
+        @keyframes waPulse {
+            0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.4)}
+            50%{box-shadow:0 4px 30px rgba(37,211,102,0.7)}
+        }
+        #floatWhatsApp:hover{transform:scale(1.1);box-shadow:0 6px 25px rgba(37,211,102,0.6)}
+    </style>
+
     <!-- Share Button -->
     <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
     <button class="share-fab" onclick="toggleShare()" title="שתפו">🔗</button>
@@ -1037,7 +1056,8 @@
                 </div>
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
-                <a class="lb-buy-btn" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
+                <a class="lb-buy-btn" id="lbWhatsApp" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
+                <a class="lb-buy-btn" id="lbWhatsAppOrder" href="#" target="_blank" style="margin-top:8px;background:linear-gradient(135deg,#128C7E,#075E54);font-size:15px;">📦 רוצה להזמין? שלחו בוואטסאפ</a>
             </div>
         </div>
     </div>
@@ -1328,6 +1348,26 @@
                 dotsContainer.appendChild(dot);
             });
             
+            // Update WhatsApp buttons with product info
+            const waMsg = encodeURIComponent(
+                `היי 👋 אני מעוניין/ת במוצר הזה:\n\n` +
+                `📦 ${title}\n` +
+                (product.p ? `💰 מחיר: ${product.p}\n` : '') +
+                `🖼️ תמונה: ${images[0]}\n` +
+                (link ? `🔗 קישור: ${link}\n` : '') +
+                `\nאשמח לפרטים נוספים!`
+            );
+            document.getElementById('lbWhatsApp').href = 'https://wa.me/972502373019?text=' + waMsg;
+            document.getElementById('lbWhatsAppOrder').href = 'https://wa.me/972502373019?text=' + encodeURIComponent(
+                `🛒 *הזמנה חדשה*\n\n` +
+                `📦 מוצר: ${title}\n` +
+                (product.p ? `💰 מחיר: ${product.p}\n` : '') +
+                `🖼️ ${images[0]}\n\n` +
+                `מידה: ___\n` +
+                `צבע: ___\n\n` +
+                `אשמח לאישור הזמנה 🙏`
+            );
+
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
