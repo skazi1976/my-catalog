@@ -1057,7 +1057,6 @@
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
                 <a class="lb-buy-btn" id="lbWhatsApp" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
-                <a class="lb-buy-btn" id="lbWhatsAppOrder" href="#" target="_blank" style="margin-top:8px;background:linear-gradient(135deg,#128C7E,#075E54);font-size:15px;">📦 רוצה להזמין? שלחו בוואטסאפ</a>
             </div>
         </div>
     </div>
@@ -1358,16 +1357,6 @@
                 `\nאשמח לפרטים נוספים!`
             );
             document.getElementById('lbWhatsApp').href = 'https://wa.me/972502373019?text=' + waMsg;
-            document.getElementById('lbWhatsAppOrder').href = 'https://wa.me/972502373019?text=' + encodeURIComponent(
-                `🛒 *הזמנה חדשה*\n\n` +
-                `📦 מוצר: ${title}\n` +
-                (product.p ? `💰 מחיר: ${product.p}\n` : '') +
-                `🖼️ ${images[0]}\n\n` +
-                `מידה: ___\n` +
-                `צבע: ___\n\n` +
-                `אשמח לאישור הזמנה 🙏`
-            );
-
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
