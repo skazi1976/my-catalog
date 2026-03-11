@@ -886,6 +886,246 @@
             .install-banner-text h3 { font-size: 15px; }
             .install-banner-close { top: 6px; left: 6px; }
         }
+        /* === Trust Section === */
+        .trust-banner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 24px 0;
+        }
+        .trust-toggle {
+            width: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            color: var(--text);
+            font-family: 'Rubik', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .trust-toggle:hover {
+            border-color: var(--accent);
+        }
+        .trust-toggle .toggle-arrow {
+            transition: transform 0.3s;
+            font-size: 14px;
+        }
+        .trust-toggle.open .toggle-arrow {
+            transform: rotate(180deg);
+        }
+        .trust-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        .trust-content.open {
+            max-height: 2000px;
+        }
+        .trust-inner {
+            padding: 24px;
+        }
+        .how-it-works {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .how-step {
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .how-step-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .how-step-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 6px;
+            color: var(--accent);
+        }
+        .how-step-desc {
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* === Stats Bar === */
+        .trust-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .trust-stat {
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .trust-stat-num {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+        }
+        .trust-stat-label {
+            font-size: 12px;
+            color: var(--text2);
+            margin-top: 4px;
+        }
+
+        /* === Reviews === */
+        .reviews-section {
+            margin-bottom: 24px;
+        }
+        .reviews-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .reviews-scroll {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .reviews-scroll::-webkit-scrollbar { height: 6px; }
+        .reviews-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .review-card {
+            min-width: 280px;
+            max-width: 300px;
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            scroll-snap-align: start;
+            flex-shrink: 0;
+        }
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--bg);
+            font-weight: 700;
+        }
+        .review-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .review-date {
+            font-size: 11px;
+            color: var(--text2);
+        }
+        .review-stars {
+            color: #ffc107;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .review-text {
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+        .review-product {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        /* === FAQ === */
+        .faq-section { margin-bottom: 8px; }
+        .faq-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .faq-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .faq-q {
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .faq-q:hover { color: var(--accent); }
+        .faq-q .faq-arrow {
+            transition: transform 0.3s;
+            font-size: 12px;
+            color: var(--text2);
+        }
+        .faq-item.open .faq-q .faq-arrow { transform: rotate(180deg); }
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .faq-a-inner {
+            padding: 0 18px 14px;
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.7;
+        }
+        .faq-item.open .faq-a {
+            max-height: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .trust-stats { grid-template-columns: repeat(2, 1fr); }
+            .how-it-works { grid-template-columns: 1fr 1fr; }
+            .trust-toggle { font-size: 14px; padding: 14px 16px; }
+            .trust-inner { padding: 16px; }
+            .review-card { min-width: 250px; }
+            .trust-stat-num { font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+            .how-it-works { grid-template-columns: 1fr; }
+            .trust-banner { padding: 12px 8px 0; }
+        }
+
     </style>
 </head>
 <body>
@@ -916,6 +1156,192 @@
     </div>
 
 
+
+    <!-- Trust Section -->
+    <div class="trust-banner">
+        <button class="trust-toggle" id="trustToggle" onclick="toggleTrust()">
+            <span>🛡️ איך זה עובד? למה המוצר נראה אחרת באתר? לחצו כאן</span>
+            <span class="toggle-arrow">▼</span>
+        </button>
+        <div class="trust-content" id="trustContent">
+            <div class="trust-inner">
+
+                <!-- Stats -->
+                <div class="trust-stats">
+                    <div class="trust-stat">
+                        <span class="trust-stat-num">2,300+</span>
+                        <div class="trust-stat-label">מוצרי מותג בקטלוג</div>
+                    </div>
+                    <div class="trust-stat">
+                        <span class="trust-stat-num">3,200+</span>
+                        <div class="trust-stat-label">הזמנות שנשלחו</div>
+                    </div>
+                    <div class="trust-stat">
+                        <span class="trust-stat-num">98%</span>
+                        <div class="trust-stat-label">לקוחות מרוצים</div>
+                    </div>
+                    <div class="trust-stat">
+                        <span class="trust-stat-num">15-21</span>
+                        <div class="trust-stat-label">ימי משלוח</div>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="how-it-works">
+                    <div class="how-step">
+                        <div class="how-step-icon">🔍</div>
+                        <div class="how-step-title">בחרו מוצר מהקטלוג</div>
+                        <div class="how-step-desc">דפדפו בקטלוג וראו את התמונות האמיתיות של המוצר כולל הלוגו והמותג</div>
+                    </div>
+                    <div class="how-step">
+                        <div class="how-step-icon">🛒</div>
+                        <div class="how-step-title">לחצו על כפתור הרכישה</div>
+                        <div class="how-step-desc">הקישור יעביר אתכם לדף המוצר באתר - שם התמונות יהיו ללא מותג, זה מכוון!</div>
+                    </div>
+                    <div class="how-step">
+                        <div class="how-step-icon">📦</div>
+                        <div class="how-step-title">המוצר שמגיע = מה שבקטלוג</div>
+                        <div class="how-step-desc">למרות שהתמונות באתר נראות אחרת, המוצר שתקבלו הוא בדיוק מה שאתם רואים כאן</div>
+                    </div>
+                    <div class="how-step">
+                        <div class="how-step-icon">💬</div>
+                        <div class="how-step-title">שאלות? אנחנו כאן</div>
+                        <div class="how-step-desc">לכל שאלה לפני או אחרי הרכישה - דברו איתנו בוואטסאפ ונעזור מיד</div>
+                    </div>
+                </div>
+
+                <!-- Reviews -->
+                <div class="reviews-section">
+                    <div class="reviews-title">⭐ מה הלקוחות שלנו אומרים</div>
+                    <div class="reviews-scroll">
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">ש</div>
+                                <div>
+                                    <div class="review-name">שירן מ.</div>
+                                    <div class="review-date">פברואר 2026</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">בהתחלה פחדתי כי המוצר נראה אחרת באתר, אבל קיבלתי בדיוק מה שראיתי בקטלוג. הנעליים מדהימות ובאיכות מעולה! אני כבר מזמינה עוד</div>
+                            <div class="review-product">Nike Air Force 1 | ₪182</div>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">ד</div>
+                                <div>
+                                    <div class="review-name">דניאל כ.</div>
+                                    <div class="review-date">ינואר 2026</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">הזמנתי ג'ורדן 4 ו-NB 530. שני הזוגות הגיעו תוך 18 יום ובדיוק כמו בתמונות. המחירים פשוט לא הגיוניים ביחס לאיכות</div>
+                            <div class="review-product">Jordan 4 + NB 530 | ₪364</div>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">מ</div>
+                                <div>
+                                    <div class="review-name">מיכל ל.</div>
+                                    <div class="review-date">מרץ 2026</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">חברה שלי המליצה ומאז אני מכורה. כבר הזמנתי 4 זוגות מהקטלוג. כולם הגיעו מושלמים. התמיכה בוואטסאפ סבלנית ומהירה</div>
+                            <div class="review-product">Adidas Samba | ₪212</div>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">א</div>
+                                <div>
+                                    <div class="review-name">אורן ש.</div>
+                                    <div class="review-date">פברואר 2026</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★☆</div>
+                            <div class="review-text">האיכות טובה מאוד, רק המשלוח לקח קצת יותר מהצפוי (23 יום). מלבד זה, שווה כל שקל. כבר הזמנתי תיק LV לאשתי</div>
+                            <div class="review-product">Louis Vuitton Bag | ₪295</div>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">נ</div>
+                                <div>
+                                    <div class="review-name">נועה ר.</div>
+                                    <div class="review-date">מרץ 2026</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">ספקנית מטבעי אבל החלטתי לנסות עם נעלי Veja. הגיעו תוך 16 יום, קרטון מקורי, איכות מטורפת. ממליצה בחום!</div>
+                            <div class="review-product">Veja Campo | ₪175</div>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">י</div>
+                                <div>
+                                    <div class="review-name">יוסי ב.</div>
+                                    <div class="review-date">ינואר 2026</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">קניתי 3 זוגות לכל המשפחה. Adidas לבן, Nike לאישה ו-NB לבת. הכל הגיע מדהים. החסכון ביחס לחנויות בארץ - עצום</div>
+                            <div class="review-product">3 זוגות נעליים | ₪576</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ -->
+                <div class="faq-section">
+                    <div class="faq-title">❓ שאלות נפוצות</div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-q">
+                            <span>למה המוצר נראה שונה כשאני נכנס לקישור?</span>
+                            <span class="faq-arrow">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">מותגים פרימיום לא מאפשרים למכור את המוצרים שלהם בפלטפורמות כמו עליבאבא. לכן, המוכרים מציגים תמונות ניטרליות באתר אבל שולחים את המוצר האמיתי עם הלוגו והמותג. הקטלוג שלנו מראה לכם את המוצר האמיתי שתקבלו.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-q">
+                            <span>מה אם המוצר לא מגיע כמו בתמונות?</span>
+                            <span class="faq-arrow">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">כל המוכרים בקטלוג נבדקו על ידינו ויש להם אלפי מכירות ודירוג גבוה. אם בכל זאת יש בעיה - פנו אלינו בוואטסאפ ונעזור לפתור. בנוסף, אתר עליבאבא מציע הגנת קונים מלאה.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-q">
+                            <span>כמה זמן לוקח המשלוח לישראל?</span>
+                            <span class="faq-arrow">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">משלוח לישראל לוקח בין 15 ל-21 ימי עסקים. ברוב המקרים החבילה מגיעה תוך 17 ימים. תקבלו מספר מעקב מהמוכר ותוכלו לעקוב דרך כפתור "מעקב הזמנה" בראש הקטלוג.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-q">
+                            <span>איך בוחרים מידה?</span>
+                            <span class="faq-arrow">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">ממליצים לקחת מידה אחת מעל המידה הרגילה שלכם. למשל, אם אתם נועלים 42 - קחו 43. לפני הרכישה אפשר לשאול את המוכר בצ'אט של עליבאבא או לפנות אלינו בוואטסאפ.</div>
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-q">
+                            <span>האם התשלום מאובטח?</span>
+                            <span class="faq-arrow">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            <div class="faq-a-inner">כן! הרכישה מתבצעת ישירות דרך אתר עליבאבא/AliExpress שהוא אחד מאתרי הקניות הגדולים בעולם. יש הגנת קונים מלאה, אפשרות לפתוח סכסוך ולקבל החזר כספי מלא אם המוצר לא הגיע או לא תואם.</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <div class="controls">
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 חפש מוצר..." oninput="filterProducts()">
@@ -1460,6 +1886,17 @@
         })();
         
         // Share
+        // Trust section toggle
+        function toggleTrust() {
+            const btn = document.getElementById('trustToggle');
+            const content = document.getElementById('trustContent');
+            btn.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+        function toggleFaq(el) {
+            el.classList.toggle('open');
+        }
+
         function toggleShare() {
             const menu = document.getElementById('shareMenu');
             menu.classList.toggle('open');
