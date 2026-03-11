@@ -886,6 +886,118 @@
             .install-banner-text h3 { font-size: 15px; }
             .install-banner-close { top: 6px; left: 6px; }
         }
+        /* === Share Banner === */
+        .share-banner {
+            max-width: 1400px;
+            margin: 16px auto 0;
+            padding: 0 24px;
+        }
+        .share-banner-inner {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .share-banner-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+        }
+        .share-banner-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,0.85);
+            font-weight: 400;
+        }
+        .share-banner-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .share-banner-btn {
+            padding: 10px 18px;
+            border-radius: 24px;
+            border: none;
+            font-family: 'Rubik', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .share-banner-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .share-banner-btn.wa { background: rgba(255,255,255,0.25); }
+        .share-banner-btn.tg { background: rgba(255,255,255,0.15); }
+        .share-banner-btn.copy { background: rgba(255,255,255,0.1); }
+
+        /* Share in lightbox */
+        .lb-share-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .lb-share-btn {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 8px;
+            border-radius: 12px;
+            border: none;
+            font-family: 'Rubik', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+            transition: transform 0.2s;
+            display: block;
+        }
+        .lb-share-btn:hover { transform: scale(1.03); }
+        .lb-share-btn.wa { background: #25D366; }
+        .lb-share-btn.tg { background: #0088cc; }
+        .lb-share-btn.copy { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+        /* Share icon on cards */
+        .card-share {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(37,211,102,0.9);
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: transform 0.2s;
+            opacity: 0;
+        }
+        .product-card:hover .card-share { opacity: 1; }
+        .card-share:hover { transform: scale(1.15); }
+        @media (max-width: 768px) {
+            .share-banner { padding: 0 8px; margin: 12px auto 0; }
+            .share-banner-inner { flex-direction: column; text-align: center; padding: 14px 16px; }
+            .share-banner-btns { justify-content: center; }
+            .share-banner-text { font-size: 14px; }
+            .card-share { opacity: 0.85; width: 28px; height: 28px; font-size: 14px; }
+        }
+
         /* === Trust Section === */
         .trust-banner {
             max-width: 1400px;
@@ -1343,6 +1455,21 @@
         </div>
     </div>
 
+    <!-- Share Banner -->
+    <div class="share-banner">
+        <div class="share-banner-inner">
+            <div>
+                <div class="share-banner-text">📢 מכירים מישהו שאוהב מותגים? שתפו את הקטלוג!</div>
+                <div class="share-banner-sub">עזרו לחברים לגלות מחירים שלא יאמינו</div>
+            </div>
+            <div class="share-banner-btns">
+                <a class="share-banner-btn wa" href="https://wa.me/?text=%F0%9F%94%A5%20%D7%AA%D7%A8%D7%90%D7%95%20%D7%9E%D7%94%20%D7%9E%D7%A6%D7%90%D7%AA%D7%99!%20%D7%A7%D7%98%D7%9C%D7%95%D7%92%20%D7%A2%D7%9D%20%D7%99%D7%95%D7%AA%D7%A8%20%D7%9E-2000%20%D7%9E%D7%95%D7%A6%D7%A8%D7%99%D7%9D%20%D7%9E%D7%9E%D7%95%D7%AA%D7%92%D7%99%D7%9D%20%D7%91%D7%9E%D7%97%D7%99%D7%A8%D7%99%20%D7%A8%D7%A6%D7%A4%D7%94%20%F0%9F%98%8D%0ANike%2C%20Adidas%2C%20Jordan%2C%20LV%2C%20Gucci%20%D7%95%D7%A2%D7%95%D7%93%0A%F0%9F%91%89%20https%3A%2F%2Fskazi1976.github.io%2Fmy-catalog%2F" target="_blank">💬 WhatsApp</a>
+                <a class="share-banner-btn tg" href="https://t.me/share/url?url=https://skazi1976.github.io/my-catalog/&text=%F0%9F%94%A5%20%D7%A7%D7%98%D7%9C%D7%95%D7%92%20%D7%9E%D7%95%D7%AA%D7%92%D7%99%D7%9D%20%D7%91%D7%9E%D7%97%D7%99%D7%A8%D7%99%20%D7%A8%D7%A6%D7%A4%D7%94!%20Nike%2C%20Adidas%2C%20Jordan%2C%20LV%20%D7%95%D7%A2%D7%95%D7%93%20%F0%9F%98%8D" target="_blank">📨 Telegram</a>
+                <button class="share-banner-btn copy" onclick="copyShareLink()">📋 העתק קישור</button>
+            </div>
+        </div>
+    </div>
+
     <div class="controls">
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 חפש מוצר..." oninput="filterProducts()">
         <select class="sort-select" onchange="setSort(this.value)">
@@ -1491,6 +1618,14 @@
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
                 <a class="lb-buy-btn" id="lbWhatsApp" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
+                <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                    <div style="font-size:14px;font-weight:600;margin-bottom:10px;color:var(--text);">🤩 מצאתם משהו שווה? שתפו עם חבר/ה!</div>
+                    <div class="lb-share-bar">
+                        <a class="lb-share-btn wa" id="lbShareWa" href="#" target="_blank">💬 WhatsApp</a>
+                        <a class="lb-share-btn tg" id="lbShareTg" href="#" target="_blank">📨 Telegram</a>
+                        <button class="lb-share-btn copy" id="lbShareCopy" onclick="copyProductLink()">📋 העתק</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1685,11 +1820,12 @@
                 const nav = imgs.length > 1 ? '<div class="gallery-nav"><button class="prev" onclick="event.stopPropagation();prevImg(this)">‹</button><button class="next" onclick="event.stopPropagation();nextImg(this)">›</button></div>' : '';
                 const badge = hasAff ? '<span class="badge badge-aff">✓ קישור</span>' : '';
                 const priceHtml = p.p ? '<div class="price">' + p.p + '</div>' : '';
+                const shareBtn = '<button class="card-share" onclick="event.stopPropagation();shareProduct(' + pi + ')" title="שתפו">↗</button>';
                 html += '<div class="product-card visible" style="animation-delay:' + Math.min(ci * 0.03, 0.6) + 's">' +
                     '<div class="card-gallery" onclick="openLightbox(' + pi + ')" style="cursor:pointer">' +
                     gallery + nav +
                     '<div class="img-count">' + imgs.length + ' 📷</div>' +
-                    badge + '</div>' +
+                    badge + shareBtn + '</div>' +
                     '<div class="card-info"><h3 class="card-title">' + p.t + '</h3>' +
                     priceHtml +
                     '<div class="buy-btn" onclick="openLightbox(' + pi + ')">👁 צפו בפריט</div></div></div>';
@@ -1820,6 +1956,11 @@
             );
             document.getElementById('lbSellerContact').href = 'https://wa.me/972502373019?text=' + sellerMsg;
 
+            // Product share links
+            const shareMsg = encodeURIComponent(`😍 תראו מה מצאתי!\n\n${title}\n💰 ${product.p || ''}\n🖼️ ${images[0]}\n\n👉 הקטלוג המלא: https://skazi1976.github.io/my-catalog/`);
+            document.getElementById('lbShareWa').href = 'https://wa.me/?text=' + shareMsg;
+            document.getElementById('lbShareTg').href = 'https://t.me/share/url?url=' + encodeURIComponent(images[0]) + '&text=' + shareMsg;
+
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
@@ -1924,6 +2065,33 @@
         
         // Share
         // Trust section toggle
+        // Share functions
+        function shareProduct(pi) {
+            const p = PRODUCTS[pi];
+            const msg = `😍 תראו מה מצאתי!\n\n${p.t}\n💰 ${p.p || ''}\n🖼️ ${p.i[0]}\n\n👉 הקטלוג המלא: https://skazi1976.github.io/my-catalog/`;
+            const encoded = encodeURIComponent(msg);
+            window.open('https://wa.me/?text=' + encoded, '_blank');
+        }
+
+        function copyShareLink() {
+            navigator.clipboard.writeText('https://skazi1976.github.io/my-catalog/').then(() => {
+                const btn = document.querySelector('.share-banner-btn.copy');
+                btn.textContent = '✅ הועתק!';
+                setTimeout(() => btn.textContent = '📋 העתק קישור', 2000);
+            });
+        }
+
+        function copyProductLink() {
+            const title = document.getElementById('lbTitle').textContent;
+            const price = document.getElementById('lbPrice').textContent;
+            const text = `${title} - ${price}\n👉 https://skazi1976.github.io/my-catalog/`;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('lbShareCopy');
+                btn.textContent = '✅ הועתק!';
+                setTimeout(() => btn.textContent = '📋 העתק', 2000);
+            });
+        }
+
         function toggleTrust() {
             const btn = document.getElementById('trustToggle');
             const content = document.getElementById('trustContent');
