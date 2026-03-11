@@ -1439,6 +1439,14 @@
                 <h3 class="lb-title" id="lbTitle"></h3>
                 <div class="price" id="lbPrice" style="margin-bottom:4px;"></div>
                 <div id="lbPriceNote" style="display:none;font-size:12px;color:var(--text2);margin-bottom:16px;">💱 המחיר בשקלים משתנה בהתאם לשער הדולר העדכני</div>
+                <div id="lbSellerInfo" style="background:linear-gradient(135deg,rgba(37,211,102,0.1),rgba(18,140,126,0.1));border:2px solid #25D366;border-radius:14px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+                    <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#25D366,#128C7E);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏪</div>
+                    <div style="flex:1;">
+                        <div style="font-size:13px;color:var(--text2);">המוכר של הפריט הזה</div>
+                        <div id="lbSellerName" style="font-weight:600;font-size:15px;color:var(--accent);"></div>
+                    </div>
+                    <a id="lbSellerContact" href="#" target="_blank" style="padding:10px 20px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border-radius:24px;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap;transition:transform 0.2s;box-shadow:0 4px 15px rgba(37,211,102,0.4);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">💬 דברו עם המוכר</a>
+                </div>
                 <div class="lb-how-to">
                     <div style="text-align:center;padding:12px;margin-bottom:16px;background:linear-gradient(135deg,rgba(0,212,170,0.1),rgba(255,215,0,0.1));border-radius:12px;border:1px solid var(--border);">
                         <span style="font-size:20px;">🚚</span>
@@ -1479,14 +1487,6 @@
                 </div>
                 <div id="lbNoLink" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;text-align:center;">
                     <p style="color:var(--text2);font-size:14px;">⚠️ אין קישור לפריט הזה.<br>ניתן לצפות באלבום המקורי ב-Yupoo.</p>
-                </div>
-                <div id="lbSellerInfo" style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
-                    <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏪</div>
-                    <div style="flex:1;">
-                        <div style="font-size:13px;color:var(--text2);">המוכר של הפריט הזה</div>
-                        <div id="lbSellerName" style="font-weight:600;font-size:15px;color:var(--accent);"></div>
-                    </div>
-                    <a id="lbSellerContact" href="#" target="_blank" style="padding:8px 16px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">💬 דברו עם המוכר</a>
                 </div>
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
