@@ -601,6 +601,44 @@
             .price { font-size: 14px; }
             .buy-btn { padding: 6px; font-size: 10px; }
         }
+        /* === LIVE Badge === */
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(255, 0, 0, 0.15);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            border-radius: var(--radius);
+            color: #ff4444;
+            font-family: 'Rubik', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff0000;
+            border-radius: 50%;
+            animation: livePulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 6px #ff0000;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 6px #ff0000; }
+            50% { opacity: 0.4; transform: scale(0.7); box-shadow: 0 0 2px #ff0000; }
+        }
+        @media (max-width: 768px) {
+            .live-badge {
+                padding: 6px 10px;
+                font-size: 11px;
+                gap: 5px;
+            }
+            .live-dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
         /* === Header Buttons === */
         .header-btns {
             display: flex;
@@ -933,6 +971,7 @@
             <div class="logo">📦 קטלוג מוצרים</div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <div class="header-btns">
+                    <div class="live-badge"><span class="live-dot"></span> LIVE</div>
                     <button onclick="openTracking()" class="hdr-btn hdr-btn-track">📍 מעקב הזמנה</button>
                     <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('🔥 קטלוג מותגים נחשבים במחירי רצפה! נעליים, בגדים ואקססוריז 👑\nhttps://skazi1976.github.io/my-catalog/'),'_blank')" class="hdr-btn hdr-btn-wa">💬 שתפו</button>
                     <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('https://skazi1976.github.io/my-catalog/')+'&text='+encodeURIComponent('🔥 קטלוג מותגים נחשבים במחירי רצפה! נעליים, בגדים ואקססוריז 👑'),'_blank')" class="hdr-btn hdr-btn-tg">📨 טלגרם</button>
