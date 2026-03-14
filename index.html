@@ -1289,6 +1289,12 @@
                 filteredIndices.sort((a, b) => parsePrice(PRODUCTS[a]) - parsePrice(PRODUCTS[b]));
             } else if (currentSort === 'price-desc') {
                 filteredIndices.sort((a, b) => parsePrice(PRODUCTS[b]) - parsePrice(PRODUCTS[a]));
+            } else {
+                // Default: shuffle randomly so every visit shows different products
+                for (let i = filteredIndices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [filteredIndices[i], filteredIndices[j]] = [filteredIndices[j], filteredIndices[i]];
+                }
             }
 
             const totalPages = Math.ceil(filteredIndices.length / PER_PAGE) || 1;
