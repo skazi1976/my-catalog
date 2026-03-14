@@ -1038,6 +1038,11 @@
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
                 <a class="lb-buy-btn" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
+                <div style="display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;">
+                    <button onclick="shareProductWhatsApp()" style="flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;background:#25D366;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">💬 שתפו</button>
+                    <button onclick="shareProductTelegram()" style="flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;background:#0088cc;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📨 טלגרם</button>
+                    <button onclick="copyProductLink()" style="flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);">📋 העתיקו</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1067,6 +1072,13 @@
                 PRODUCTS = data;
                 buildBrandChips();
                 filterProducts();
+                // Direct product link via hash
+                var hash = window.location.hash;
+                if (hash && hash.startsWith('#product=')) {
+                    var albumId = hash.replace('#product=', '');
+                    var idx = findProductByAlbumId(albumId);
+                    if (idx >= 0) openLightbox(idx);
+                }
             })
             .catch(e => {
                 document.getElementById('grid').innerHTML = '<div class="no-results" style="display:block">שגיאה בטעינת המוצרים</div>';
@@ -1275,11 +1287,37 @@
             filterProducts();
         });
         
+        // === Direct Product Linking ===
+        function getProductId(product) {
+            if (!product || !product.i || !product.i[0]) return '';
+            var m = product.i[0].match(/images\/(\d+)\//);
+            return m ? m[1] : '';
+        }
+        function findProductByAlbumId(albumId) {
+            for (var i = 0; i < PRODUCTS.length; i++) {
+                if (getProductId(PRODUCTS[i]) === albumId) return i;
+            }
+            return -1;
+        }
+        function getProductDirectLink(product) {
+            var id = getProductId(product);
+            return id ? (window.location.origin + window.location.pathname + '#product=' + id) : '';
+        }
+        window.addEventListener('hashchange', function() {
+            var hash = window.location.hash;
+            if (hash && hash.startsWith('#product=')) {
+                var albumId = hash.replace('#product=', '');
+                var idx = findProductByAlbumId(albumId);
+                if (idx >= 0) openLightbox(idx);
+            }
+        });
+
         // === Lightbox ===
         let lbImages = [];
         let lbIndex = 0;
         
         function openLightbox(productIndex) {
+            currentProductIndex = productIndex;
             const product = PRODUCTS[productIndex];
             const images = product.i;
             const title = product.t;
@@ -1331,11 +1369,14 @@
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
+            var albumId = getProductId(product);
+            if (albumId) history.replaceState(null, '', '#product=' + albumId);
         }
         
         function closeLightbox() {
             document.getElementById('lightboxOverlay').classList.remove('open');
             document.body.style.overflow = '';
+            history.replaceState(null, '', window.location.pathname);
         }
         
         function lbGoTo(idx) {
@@ -1466,6 +1507,27 @@
                 prompt('העתיקו את הקישור:', 'https://skazi1976.github.io/my-catalog/');
             });
             document.getElementById('shareMenu').classList.remove('open');
+        }
+        // Product share functions
+        var currentProductIndex = -1;
+        function shareProductWhatsApp() {
+            var link = getProductDirectLink(PRODUCTS[currentProductIndex]);
+            var title = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].t : '';
+            var text = encodeURIComponent('🔥 ' + title + '\n' + link);
+            window.open('https://wa.me/?text=' + text, '_blank');
+        }
+        function shareProductTelegram() {
+            var link = getProductDirectLink(PRODUCTS[currentProductIndex]);
+            var title = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].t : '';
+            window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('🔥 ' + title), '_blank');
+        }
+        function copyProductLink() {
+            var link = getProductDirectLink(PRODUCTS[currentProductIndex]);
+            navigator.clipboard.writeText(link).then(function() {
+                alert('הקישור למוצר הועתק! 📋');
+            }).catch(function() {
+                prompt('העתיקו את הקישור:', link);
+            });
         }
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.share-fab') && !e.target.closest('.share-menu')) {
