@@ -601,6 +601,45 @@
             .price { font-size: 14px; }
             .buy-btn { padding: 6px; font-size: 10px; }
         }
+        /* === Header Buttons === */
+        .header-btns {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+            flex-wrap: nowrap;
+        }
+        .hdr-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius);
+            color: white;
+            font-family: 'Rubik', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .hdr-btn-track { background: linear-gradient(135deg, #FF6A00, #FF8C00); }
+        .hdr-btn-wa { background: #25D366; }
+        .hdr-btn-tg { background: #0088cc; }
+        .hdr-btn:hover { opacity: 0.9; transform: scale(1.03); }
+        @media (max-width: 768px) {
+            .header-btns {
+                gap: 6px;
+            }
+            .hdr-btn {
+                padding: 8px 10px;
+                font-size: 12px;
+                border-radius: 10px;
+            }
+        }
+        @media (max-width: 400px) {
+            .hdr-btn {
+                padding: 7px 8px;
+                font-size: 11px;
+            }
+        }
         /* === Share Button === */
         
         /* === Tracking Modal === */
@@ -892,14 +931,16 @@
     <div class="header">
         <div class="header-inner">
             <div class="logo">📦 קטלוג מוצרים</div>
-            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                <button onclick="openTracking()" style="padding:10px 20px;background:linear-gradient(135deg,#FF6A00,#FF8C00);border:none;border-radius:var(--radius);color:white;font-family:'Rubik',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;">📍 מעקב הזמנה</button>
-                <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('🔥 קטלוג מותגים נחשבים במחירי רצפה! נעליים, בגדים ואקססוריז 👑\nhttps://skazi1976.github.io/my-catalog/'),'_blank')" style="padding:10px 16px;background:#25D366;border:none;border-radius:var(--radius);color:white;font-family:'Rubik',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;">💬 שתפו</button>
-                <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('https://skazi1976.github.io/my-catalog/')+'&text='+encodeURIComponent('🔥 קטלוג מותגים נחשבים במחירי רצפה! נעליים, בגדים ואקססוריז 👑'),'_blank')" style="padding:10px 16px;background:#0088cc;border:none;border-radius:var(--radius);color:white;font-family:'Rubik',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;">📨 טלגרם</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <div class="header-btns">
+                    <button onclick="openTracking()" class="hdr-btn hdr-btn-track">📍 מעקב הזמנה</button>
+                    <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('🔥 קטלוג מותגים נחשבים במחירי רצפה! נעליים, בגדים ואקססוריז 👑\nhttps://skazi1976.github.io/my-catalog/'),'_blank')" class="hdr-btn hdr-btn-wa">💬 שתפו</button>
+                    <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('https://skazi1976.github.io/my-catalog/')+'&text='+encodeURIComponent('🔥 קטלוג מותגים נחשבים במחירי רצפה! נעליים, בגדים ואקססוריז 👑'),'_blank')" class="hdr-btn hdr-btn-tg">📨 טלגרם</button>
+                </div>
                 <div class="stats">
-                <div><span class="stat-num">2340</span> מוצרים</div>
-                <div><span class="stat-num">2336</span> קישורים</div>
-            </div>
+                    <div><span class="stat-num">2340</span> מוצרים</div>
+                    <div><span class="stat-num">2336</span> קישורים</div>
+                </div>
             </div>
         </div>
     </div>
