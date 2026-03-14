@@ -993,7 +993,12 @@
             <div class="lb-info">
                 <h3 class="lb-title" id="lbTitle"></h3>
                 <div class="price" id="lbPrice" style="margin-bottom:4px;"></div>
-                <div id="lbPriceNote" style="display:none;font-size:12px;color:var(--text2);margin-bottom:16px;">💱 המחיר בשקלים משתנה בהתאם לשער הדולר העדכני</div>
+                <div id="lbPriceNote" style="display:none;font-size:12px;color:var(--text2);margin-bottom:12px;">💱 המחיר בשקלים משתנה בהתאם לשער הדולר העדכני</div>
+                <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;flex-wrap:wrap;">
+                    <button onclick="shareProductWhatsApp()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:#25D366;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">💬 שתפו</button>
+                    <button onclick="shareProductTelegram()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:#0088cc;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📨 טלגרם</button>
+                    <button onclick="copyProductLink()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);">📋 העתיקו</button>
+                </div>
                 <div class="lb-how-to">
                     <div style="text-align:center;padding:12px;margin-bottom:16px;background:linear-gradient(135deg,rgba(0,212,170,0.1),rgba(255,215,0,0.1));border-radius:12px;border:1px solid var(--border);">
                         <span style="font-size:20px;">🚚</span>
@@ -1038,11 +1043,6 @@
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
                 <a class="lb-buy-btn" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
-                <div style="display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;">
-                    <button onclick="shareProductWhatsApp()" style="flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;background:#25D366;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">💬 שתפו</button>
-                    <button onclick="shareProductTelegram()" style="flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;background:#0088cc;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📨 טלגרם</button>
-                    <button onclick="copyProductLink()" style="flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);">📋 העתיקו</button>
-                </div>
             </div>
         </div>
     </div>
