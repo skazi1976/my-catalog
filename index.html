@@ -1648,6 +1648,28 @@
         let currentSort = 'default';
         let currentBrand = '';
 
+        // Extract album ID from product image URL (e.g. "images/224892307/001.jpg" -> "224892307")
+        function getProductId(product) {
+            if (!product || !product.i || !product.i.length) return null;
+            const match = product.i[0].match(/images\/(\d+)\//);
+            return match ? match[1] : null;
+        }
+
+        // Find product index by album ID
+        function findProductByAlbumId(albumId) {
+            for (let i = 0; i < PRODUCTS.length; i++) {
+                if (getProductId(PRODUCTS[i]) === albumId) return i;
+            }
+            return -1;
+        }
+
+        // Get direct link URL for a product
+        function getProductDirectLink(product) {
+            const id = getProductId(product);
+            if (!id) return 'https://skazi1976.github.io/my-catalog/';
+            return 'https://skazi1976.github.io/my-catalog/#product=' + id;
+        }
+
         // Load product data
         fetch('data.json')
             .then(r => r.json())
@@ -1660,6 +1682,16 @@
                 PRODUCTS = data;
                 buildBrandChips();
                 filterProducts();
+
+                // Check for direct product link in URL hash
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#product=')) {
+                    const albumId = hash.replace('#product=', '');
+                    const idx = findProductByAlbumId(albumId);
+                    if (idx >= 0) {
+                        openLightbox(idx);
+                    }
+                }
             })
             .catch(e => {
                 document.getElementById('grid').innerHTML = '<div class="no-results" style="display:block">שגיאה בטעינת המוצרים</div>';
@@ -1956,19 +1988,28 @@
             );
             document.getElementById('lbSellerContact').href = 'https://wa.me/972502373019?text=' + sellerMsg;
 
-            // Product share links
-            const shareMsg = encodeURIComponent(`😍 תראו מה מצאתי!\n\n${title}\n💰 ${product.p || ''}\n🖼️ ${images[0]}\n\n👉 הקטלוג המלא: https://skazi1976.github.io/my-catalog/`);
+            // Product share links with direct URL
+            const directLink = getProductDirectLink(product);
+            const shareMsg = encodeURIComponent(`😍 תראו מה מצאתי!\n\n${title}\n💰 ${product.p || ''}\n\n👉 ${directLink}`);
             document.getElementById('lbShareWa').href = 'https://wa.me/?text=' + shareMsg;
-            document.getElementById('lbShareTg').href = 'https://t.me/share/url?url=' + encodeURIComponent(images[0]) + '&text=' + shareMsg;
+            document.getElementById('lbShareTg').href = 'https://t.me/share/url?url=' + encodeURIComponent(directLink) + '&text=' + shareMsg;
 
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
+
+            // Set URL hash for direct linking
+            const albumId = getProductId(product);
+            if (albumId) {
+                history.replaceState(null, '', '#product=' + albumId);
+            }
         }
         
         function closeLightbox() {
             document.getElementById('lightboxOverlay').classList.remove('open');
             document.body.style.overflow = '';
+            // Clear hash without triggering scroll
+            history.replaceState(null, '', window.location.pathname);
         }
         
         function lbGoTo(idx) {
@@ -1993,6 +2034,19 @@
             if (e.key === 'Escape') closeLightbox();
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 lbNav(e.key === 'ArrowLeft' ? 1 : -1);
+            }
+        });
+
+        // Handle browser back/forward with hash changes
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#product=') && PRODUCTS.length) {
+                const albumId = hash.replace('#product=', '');
+                const idx = findProductByAlbumId(albumId);
+                if (idx >= 0) openLightbox(idx);
+            } else {
+                const overlay = document.getElementById('lightboxOverlay');
+                if (overlay.classList.contains('open')) closeLightbox();
             }
         });
         
@@ -2068,7 +2122,8 @@
         // Share functions
         function shareProduct(pi) {
             const p = PRODUCTS[pi];
-            const msg = `😍 תראו מה מצאתי!\n\n${p.t}\n💰 ${p.p || ''}\n🖼️ ${p.i[0]}\n\n👉 הקטלוג המלא: https://skazi1976.github.io/my-catalog/`;
+            const directLink = getProductDirectLink(p);
+            const msg = `😍 תראו מה מצאתי!\n\n${p.t}\n💰 ${p.p || ''}\n\n👉 ${directLink}`;
             const encoded = encodeURIComponent(msg);
             window.open('https://wa.me/?text=' + encoded, '_blank');
         }
@@ -2084,7 +2139,8 @@
         function copyProductLink() {
             const title = document.getElementById('lbTitle').textContent;
             const price = document.getElementById('lbPrice').textContent;
-            const text = `${title} - ${price}\n👉 https://skazi1976.github.io/my-catalog/`;
+            const directLink = window.location.href;
+            const text = `${title} - ${price}\n👉 ${directLink}`;
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('lbShareCopy');
                 btn.textContent = '✅ הועתק!';
