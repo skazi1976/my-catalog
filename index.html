@@ -940,6 +940,7 @@
                 <div class="stats">
                     <div><span class="stat-num">2340</span> מוצרים</div>
                     <div><span class="stat-num">2336</span> קישורים</div>
+                    <div>🟢 <span class="stat-num" id="headerOnline" style="color:var(--accent);">68</span> באתר</div>
                 </div>
             </div>
         </div>
@@ -1502,15 +1503,35 @@
                     });
 
                     countRef.on('value', function(snap) {
-                        var count = snap.numChildren();
-                        document.getElementById('onlineCount').textContent = count;
+                        var realCount = snap.numChildren();
+                        var boosted = 68 + realCount + Math.floor(Math.random() * 5);
+                        document.getElementById('onlineCount').textContent = boosted;
+                        document.getElementById('headerOnline').textContent = boosted;
                     });
 
-                    setInterval(function() { myRef.set(true); }, 60000);
+                    // Gradual climb effect
+                    setInterval(function() {
+                        myRef.set(true);
+                        var el = document.getElementById('headerOnline');
+                        var cur = parseInt(el.textContent) || 68;
+                        var delta = Math.random() < 0.6 ? Math.floor(Math.random() * 3) + 1 : -Math.floor(Math.random() * 2);
+                        var next = Math.max(68, cur + delta);
+                        el.textContent = next;
+                        document.getElementById('onlineCount').textContent = next;
+                    }, 8000);
                 })
                 .catch(function(e) {
                     console.error('Firebase load error:', e);
-                    document.getElementById('onlineCount').textContent = '—';
+                    document.getElementById('onlineCount').textContent = '68';
+                    document.getElementById('headerOnline').textContent = '68';
+                    // Simulate climb even without Firebase
+                    var fakeCount = 68;
+                    setInterval(function() {
+                        var delta = Math.random() < 0.6 ? Math.floor(Math.random() * 3) + 1 : -Math.floor(Math.random() * 2);
+                        fakeCount = Math.max(68, fakeCount + delta);
+                        document.getElementById('onlineCount').textContent = fakeCount;
+                        document.getElementById('headerOnline').textContent = fakeCount;
+                    }, 8000);
                 });
         })();
         
