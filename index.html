@@ -378,6 +378,157 @@
             font-size: 13px;
             border-top: 1px solid var(--border);
         }
+
+        /* === WhatsApp Share === */
+        .wa-fab {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #25D366;
+            border: none;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+            transition: all 0.3s;
+            animation: waPulse 2s ease-in-out infinite;
+        }
+        .wa-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(37,211,102,0.6);
+        }
+        .wa-fab svg { width: 32px; height: 32px; fill: white; }
+        @keyframes waPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
+            50% { box-shadow: 0 4px 30px rgba(37,211,102,0.7); }
+        }
+
+        .wa-popup {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            left: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 340px;
+            z-index: 999;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            animation: waSlideUp 0.4s ease;
+            direction: rtl;
+        }
+        .wa-popup.show { display: block; }
+        @keyframes waSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .wa-popup-close {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .wa-popup h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .wa-popup p {
+            font-size: 14px;
+            color: var(--text2);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .wa-share-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Rubik', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .wa-share-btn:hover {
+            background: #1da851;
+            transform: scale(1.02);
+        }
+        .wa-share-btn svg { width: 22px; height: 22px; fill: white; }
+
+        .wa-product-btn {
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 14px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Rubik', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .product-card:hover .wa-product-btn { display: inline-flex; }
+        .wa-product-btn:hover { background: #1da851; }
+        .wa-product-btn svg { width: 16px; height: 16px; fill: white; }
+
+        /* Auto popup */
+        .wa-auto-popup {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .wa-auto-popup.show { display: flex; }
+        .wa-auto-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: waSlideUp 0.4s ease;
+            direction: rtl;
+        }
+        .wa-auto-box .wa-emoji { font-size: 48px; margin-bottom: 12px; }
+        .wa-auto-box h3 { font-size: 22px; margin-bottom: 8px; color: var(--text); }
+        .wa-auto-box p { font-size: 15px; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+        .wa-auto-box .wa-skip {
+            display: block;
+            margin-top: 12px;
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: 13px;
+            cursor: pointer;
+            font-family: 'Rubik', sans-serif;
+        }
+        .wa-auto-box .wa-skip:hover { color: var(--text); }
         
         .no-results {
             grid-column: 1 / -1;
@@ -1759,6 +1910,109 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch(function() {});
         }
+
+        // === WhatsApp Viral Sharing ===
+        (function() {
+            var WA_SVG = '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+
+            var CATALOG_URL = 'https://skazi1976.github.io/my-catalog/';
+
+            var shareMsg = '🔥 מצאתי קטלוג מטורף של מותגים במחירי רצפה!\n\n' +
+                '👟 Nike, Adidas, Jordan, LV, Dior ועוד 2,700+ פריטים\n' +
+                '💰 מחירים הכי זולים שיש\n' +
+                '🚚 משלוח ישיר\n\n' +
+                'תראה בעצמך 👇\n' + CATALOG_URL;
+
+            function waLink(msg) {
+                return 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+            }
+
+            function productShareMsg(title, price, link) {
+                return '😍 תראה מה מצאתי!\n\n' + title + '\n💰 ' + price + '\n\n' + link + '\n\nיש עוד אלפי מוצרים בקטלוג: ' + CATALOG_URL;
+            }
+
+            // 1. Floating WhatsApp button
+            var fab = document.createElement('button');
+            fab.className = 'wa-fab';
+            fab.innerHTML = WA_SVG;
+            fab.title = 'שתף בוואטסאפ';
+            fab.onclick = function() {
+                var popup = document.getElementById('waPopup');
+                popup.classList.toggle('show');
+            };
+            document.body.appendChild(fab);
+
+            // 2. Share popup
+            var popup = document.createElement('div');
+            popup.id = 'waPopup';
+            popup.className = 'wa-popup';
+            popup.innerHTML = '<button class="wa-popup-close" onclick="this.parentElement.classList.remove(\'show\')">&times;</button>' +
+                '<h3>📲 שתף עם חברים</h3>' +
+                '<p>שלח את הקטלוג לחברים שלך בוואטסאפ ותעזור להם לחסוך על מותגים!</p>' +
+                '<a href="' + waLink(shareMsg) + '" target="_blank" rel="noopener" class="wa-share-btn" style="text-decoration:none">' + WA_SVG + ' שלח בוואטסאפ</a>';
+            document.body.appendChild(popup);
+
+            // 3. Add share button to product cards (delegated)
+            document.addEventListener('click', function(e) {
+                var waBtn = e.target.closest('.wa-product-btn');
+                if (waBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var card = waBtn.closest('.product-card');
+                    var title = (card.querySelector('.card-title') || {}).textContent || '';
+                    var price = (card.querySelector('.price') || {}).textContent || '';
+                    var link = CATALOG_URL + '#product=' + (waBtn.dataset.pid || '');
+                    window.open(waLink(productShareMsg(title, price, link)), '_blank');
+                }
+            });
+
+            // Inject share buttons into product cards
+            function addShareButtons() {
+                document.querySelectorAll('.product-card').forEach(function(card, i) {
+                    if (card.querySelector('.wa-product-btn')) return;
+                    var info = card.querySelector('.card-info');
+                    if (!info) return;
+                    var pid = '';
+                    var img = card.querySelector('.gallery-img');
+                    if (img && img.src) {
+                        var m = img.src.match(/images\/(\d+)\//);
+                        if (m) pid = m[1];
+                    }
+                    var btn = document.createElement('button');
+                    btn.className = 'wa-product-btn';
+                    btn.dataset.pid = pid;
+                    btn.innerHTML = WA_SVG + ' שתף';
+                    info.appendChild(btn);
+                });
+            }
+
+            // Run after products render
+            var shareObserver = new MutationObserver(function() { addShareButtons(); });
+            shareObserver.observe(document.querySelector('.grid') || document.body, { childList: true, subtree: true });
+            setTimeout(addShareButtons, 2000);
+
+            // 4. Auto popup after 45 seconds (once per session)
+            if (!sessionStorage.getItem('wa-popup-shown')) {
+                setTimeout(function() {
+                    if (sessionStorage.getItem('wa-popup-shown')) return;
+                    sessionStorage.setItem('wa-popup-shown', '1');
+
+                    var overlay = document.createElement('div');
+                    overlay.className = 'wa-auto-popup show';
+                    overlay.innerHTML = '<div class="wa-auto-box">' +
+                        '<div class="wa-emoji">🎁</div>' +
+                        '<h3>מצאת משהו שאהבת?</h3>' +
+                        '<p>שתף את הקטלוג עם חברים שלך בוואטסאפ!<br>יש כאן מעל 2,700 פריטים ממותגים מובילים במחירי רצפה 🤩</p>' +
+                        '<a href="' + waLink(shareMsg) + '" target="_blank" rel="noopener" class="wa-share-btn" style="text-decoration:none" onclick="this.closest(\'.wa-auto-popup\').remove()">' + WA_SVG + ' שתף עכשיו בוואטסאפ</a>' +
+                        '<button class="wa-skip" onclick="this.closest(\'.wa-auto-popup\').remove()">לא עכשיו</button>' +
+                        '</div>';
+                    document.body.appendChild(overlay);
+                    overlay.addEventListener('click', function(e) {
+                        if (e.target === overlay) overlay.remove();
+                    });
+                }, 45000);
+            }
+        })();
 
         // === Analytics Tracking ===
         (function() {
