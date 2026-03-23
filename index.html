@@ -1929,6 +1929,15 @@
                 '🚚 משלוח ישיר\n\n' +
                 'תראה בעצמך 👇\n' + CATALOG_URL;
 
+            var TRACK_URL = 'https://catalog-analytics.ohadf1976.workers.dev/track';
+            function trackShare(source, detail) {
+                try {
+                    var d = JSON.stringify({ type: 'share', query: source + (detail ? ': ' + detail : '') });
+                    navigator.sendBeacon ? navigator.sendBeacon(TRACK_URL, d)
+                        : fetch(TRACK_URL, { method: 'POST', body: d, headers: { 'Content-Type': 'application/json' } });
+                } catch(e) {}
+            }
+
             function waLink(msg) {
                 return 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
             }
@@ -1955,7 +1964,7 @@
             popup.innerHTML = '<button class="wa-popup-close" onclick="this.parentElement.classList.remove(\'show\')">&times;</button>' +
                 '<h3>📲 שתף עם חברים</h3>' +
                 '<p>שלח את הקטלוג לחברים שלך בוואטסאפ ותעזור להם לחסוך על מותגים!</p>' +
-                '<a href="' + waLink(shareMsg) + '" target="_blank" rel="noopener" class="wa-share-btn" style="text-decoration:none">' + WA_SVG + ' שלח בוואטסאפ</a>';
+                '<a href="' + waLink(shareMsg) + '" target="_blank" rel="noopener" class="wa-share-btn" style="text-decoration:none" onclick="trackShare(\'popup\')">' + WA_SVG + ' שלח בוואטסאפ</a>';
             document.body.appendChild(popup);
 
             // 3. Add share button to product cards (delegated)
@@ -1968,6 +1977,7 @@
                     var title = (card.querySelector('.card-title') || {}).textContent || '';
                     var price = (card.querySelector('.price') || {}).textContent || '';
                     var link = CATALOG_URL + '#product=' + (waBtn.dataset.pid || '');
+                    trackShare('product', title.substring(0, 40));
                     window.open(waLink(productShareMsg(title, price, link)), '_blank');
                 }
             });
@@ -2009,7 +2019,7 @@
                         '<div class="wa-emoji">🎁</div>' +
                         '<h3>מצאת משהו שאהבת?</h3>' +
                         '<p>שתף את הקטלוג עם חברים שלך בוואטסאפ!<br>יש כאן מעל 2,700 פריטים ממותגים מובילים במחירי רצפה 🤩</p>' +
-                        '<a href="' + waLink(shareMsg) + '" target="_blank" rel="noopener" class="wa-share-btn" style="text-decoration:none" onclick="this.closest(\'.wa-auto-popup\').remove()">' + WA_SVG + ' שתף עכשיו בוואטסאפ</a>' +
+                        '<a href="' + waLink(shareMsg) + '" target="_blank" rel="noopener" class="wa-share-btn" style="text-decoration:none" onclick="trackShare(\'auto-popup\'); this.closest(\'.wa-auto-popup\').remove()">' + WA_SVG + ' שתף עכשיו בוואטסאפ</a>' +
                         '<button class="wa-skip" onclick="this.closest(\'.wa-auto-popup\').remove()">לא עכשיו</button>' +
                         '</div>';
                     document.body.appendChild(overlay);
