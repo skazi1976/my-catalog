@@ -199,9 +199,11 @@
       <!-- Stats Grid -->
       <div class="stats-grid" id="statsGrid">
         <div class="stat-card"><div class="stat-number" id="statTotal">-</div><div class="stat-label">סה"כ אירועים</div></div>
-        <div class="stat-card"><div class="stat-number" id="statSearches">-</div><div class="stat-label">חיפושים</div></div>
-        <div class="stat-card"><div class="stat-number" id="statViews">-</div><div class="stat-label">צפיות</div></div>
-        <div class="stat-card"><div class="stat-number" id="statClicks">-</div><div class="stat-label">קליקים</div></div>
+        <div class="stat-card"><div class="stat-number" id="statSearches">-</div><div class="stat-label">🔍 חיפושים</div></div>
+        <div class="stat-card"><div class="stat-number" id="statViews">-</div><div class="stat-label">👁️ צפיות</div></div>
+        <div class="stat-card"><div class="stat-number" id="statClicks">-</div><div class="stat-label">🖱️ קליקים</div></div>
+        <div class="stat-card"><div class="stat-number" id="statShares" style="color:#25D366">-</div><div class="stat-label">📲 שיתופי WhatsApp</div></div>
+        <div class="stat-card"><div class="stat-number" id="statInstalls" style="color:#FF6B00">-</div><div class="stat-label">⬇️ התקנות PWA</div></div>
       </div>
 
       <!-- Search Logs Tab -->
@@ -335,6 +337,8 @@ function timeAgo(ts) {
 function typeLabel(type) {
   if (type === 'search') return '🔍 חיפוש';
   if (type === 'click') return '🖱️ קליק';
+  if (type === 'share') return '📲 שיתוף';
+  if (type === 'install') return '⬇️ התקנה';
   return '👁️ צפייה';
 }
 
@@ -404,6 +408,8 @@ async function loadData() {
     document.getElementById('statSearches').textContent = searchData.searchCount.toLocaleString();
     document.getElementById('statViews').textContent = searchData.viewCount.toLocaleString();
     document.getElementById('statClicks').textContent = searchData.clickCount.toLocaleString();
+    document.getElementById('statShares').textContent = (searchData.shareCount || 0).toLocaleString();
+    document.getElementById('statInstalls').textContent = (searchData.installCount || 0).toLocaleString();
 
     // Top queries chart
     renderBarChart('topQueriesChart', searchData.topQueries.map(q => ({
