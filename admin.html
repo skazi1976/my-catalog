@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | קטלוג מותגים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C5CE7;
+      --primary-dark: #5A4BD1;
+      --success: #00B894;
+      --danger: #D63031;
+      --warning: #FDCB6E;
+      --bg: #F8F9FD;
+      --card: #fff;
+      --text: #2D3436;
+      --text-light: #636E72;
+      --border: #E8ECF1;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Assistant', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Login */
+    .login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 40px; border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 400px; width: 100%; text-align: center;
+    }
+    .login-box h1 { font-family: 'Heebo', sans-serif; margin-bottom: 8px; color: var(--primary); }
+    .login-box p { color: var(--text-light); margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: 8px;
+      font-size: 1rem; margin-bottom: 16px; font-family: 'Assistant'; outline: none;
+    }
+    .login-box input:focus { border-color: var(--primary); }
+    .login-error { color: var(--danger); font-size: 0.9rem; margin-bottom: 12px; display: none; }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; font-family: 'Assistant'; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-outline { background: none; border: 2px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+    .btn-block { width: 100%; }
+
+    /* Admin Panel */
+    .admin-panel { display: none; }
+    .admin-header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .admin-header h1 { font-family: 'Heebo'; font-size: 1.3rem; color: var(--primary); }
+    .admin-nav { display: flex; gap: 4px; padding: 0 24px; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .admin-nav button {
+      padding: 14px 20px; border: none; background: none; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; color: var(--text-light); border-bottom: 3px solid transparent;
+      font-family: 'Assistant'; white-space: nowrap; transition: all 0.2s;
+    }
+    .admin-nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .admin-nav button:hover { color: var(--primary); }
+
+    .admin-content { max-width: 1000px; margin: 24px auto; padding: 0 24px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Cards */
+    .admin-card {
+      background: var(--card); border-radius: var(--radius); padding: 24px;
+      border: 1px solid var(--border); margin-bottom: 20px;
+    }
+    .admin-card h2 { font-family: 'Heebo'; font-size: 1.1rem; margin-bottom: 16px; }
+
+    /* Tables */
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th, .admin-table td {
+      padding: 12px 16px; text-align: right; border-bottom: 1px solid var(--border);
+    }
+    .admin-table th { font-weight: 600; color: var(--text-light); font-size: 0.85rem; }
+    .admin-table td { font-size: 0.95rem; }
+    .admin-table tr:hover { background: #f9f9ff; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; text-align: center;
+    }
+    .stat-number { font-size: 2rem; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
+
+    /* Bar chart */
+    .bar-chart { margin-top: 12px; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
+    .bar-label { min-width: 140px; font-size: 0.9rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; height: 28px; background: var(--border); border-radius: 6px; overflow: hidden; position: relative; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #a29bfe); border-radius: 6px; transition: width 0.5s; display: flex; align-items: center; padding: 0 8px; }
+    .bar-value { font-size: 0.8rem; font-weight: 700; color: #fff; white-space: nowrap; }
+
+    /* Country flags */
+    .country-flag { font-size: 1.2rem; margin-left: 6px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 14px 28px; border-radius: 8px; color: #fff; font-weight: 600;
+      z-index: 1000; display: none;
+    }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    /* Filter */
+    .filter-input {
+      padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px;
+      font-size: 0.95rem; width: 250px; margin-bottom: 16px; font-family: 'Assistant'; outline: none;
+    }
+    .filter-input:focus { border-color: var(--primary); }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+
+    /* Daily chart */
+    .daily-chart { display: flex; align-items: flex-end; gap: 4px; height: 150px; padding: 0 4px; }
+    .daily-bar { flex: 1; min-width: 20px; background: linear-gradient(to top, var(--primary), #a29bfe); border-radius: 4px 4px 0 0; transition: height 0.5s; position: relative; cursor: pointer; }
+    .daily-bar:hover { opacity: 0.8; }
+    .daily-bar .tooltip {
+      display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: #fff; padding: 4px 8px; border-radius: 4px;
+      font-size: 0.75rem; white-space: nowrap; margin-bottom: 4px;
+    }
+    .daily-bar:hover .tooltip { display: block; }
+    .daily-labels { display: flex; gap: 4px; padding: 4px 4px 0; }
+    .daily-labels span { flex: 1; min-width: 20px; text-align: center; font-size: 0.65rem; color: var(--text-light); }
+
+    /* Form */
+    .form-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: end; }
+    .form-group { flex: 1; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-light); }
+    .form-group input {
+      width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px;
+      font-size: 0.95rem; font-family: 'Assistant'; outline: none;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+
+    /* Loading */
+    .loading { text-align: center; padding: 40px; color: var(--text-light); }
+    .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .filter-input { width: 100%; }
+      .bar-label { min-width: 100px; font-size: 0.8rem; }
+      .admin-nav button { padding: 12px 14px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <h1>🔐 Admin</h1>
+      <p>קטלוג מותגים - פאנל ניהול</p>
+      <div class="login-error" id="loginError">סיסמה שגויה</div>
+      <input type="password" id="loginPassword" placeholder="סיסמת מנהל" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn btn-primary btn-block" onclick="doLogin()">כניסה</button>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h1>📦 קטלוג מותגים - ניהול</h1>
+      <div>
+        <a href="index.html" class="btn btn-outline btn-sm">← לקטלוג</a>
+        <button class="btn btn-outline btn-sm" onclick="doLogout()" style="margin-right:8px">יציאה</button>
+      </div>
+    </div>
+
+    <div class="admin-nav">
+      <button class="active" onclick="switchTab('searches')">🔍 לוג חיפושים</button>
+      <button onclick="switchTab('visitors')">🌍 מבקרים</button>
+      <button onclick="switchTab('daily')">📊 יומי</button>
+      <button onclick="switchTab('settings')">⚙️ הגדרות</button>
+    </div>
+
+    <div class="admin-content">
+      <!-- Stats Grid -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-number" id="statTotal">-</div><div class="stat-label">סה"כ אירועים</div></div>
+        <div class="stat-card"><div class="stat-number" id="statSearches">-</div><div class="stat-label">חיפושים</div></div>
+        <div class="stat-card"><div class="stat-number" id="statViews">-</div><div class="stat-label">צפיות</div></div>
+        <div class="stat-card"><div class="stat-number" id="statClicks">-</div><div class="stat-label">קליקים</div></div>
+      </div>
+
+      <!-- Search Logs Tab -->
+      <div class="tab-panel active" id="tab-searches">
+        <div class="admin-card">
+          <h2>🔥 חיפושים פופולריים</h2>
+          <div id="topQueriesChart" class="bar-chart">
+            <div class="loading"><div class="spinner"></div><br>טוען...</div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="toolbar">
+            <h2>חיפושים אחרונים</h2>
+            <input type="text" class="filter-input" placeholder="🔍 סנן..." oninput="filterRecent(this.value)">
+          </div>
+          <div style="overflow-x:auto">
+            <table class="admin-table">
+              <thead><tr><th>שאילתה</th><th>סוג</th><th>מדינה</th><th>עיר</th><th>זמן</th></tr></thead>
+              <tbody id="recentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visitors Tab -->
+      <div class="tab-panel" id="tab-visitors">
+        <div class="admin-card">
+          <h2>🌍 מבקרים לפי מדינה</h2>
+          <div id="countriesChart" class="bar-chart">
+            <div class="loading"><div class="spinner"></div><br>טוען...</div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h2>🏙️ מבקרים לפי עיר</h2>
+          <div id="citiesChart" class="bar-chart">
+            <div class="loading"><div class="spinner"></div><br>טוען...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Tab -->
+      <div class="tab-panel" id="tab-daily">
+        <div class="admin-card">
+          <h2>📊 חיפושים יומיים (30 יום אחרונים)</h2>
+          <div id="dailyChartContainer">
+            <div class="loading"><div class="spinner"></div><br>טוען...</div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h2>📈 צפיות יומיות</h2>
+          <div id="dailyViewsContainer">
+            <div class="loading"><div class="spinner"></div><br>טוען...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div class="tab-panel" id="tab-settings">
+        <div class="admin-card">
+          <h2>🔑 שינוי סיסמה</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label>סיסמה חדשה</label>
+              <input type="password" id="newPassword" placeholder="סיסמה חדשה (מינימום 4 תווים)">
+            </div>
+            <div class="form-group">
+              <label>אישור סיסמה</label>
+              <input type="password" id="confirmPassword" placeholder="הקלד שוב">
+            </div>
+            <button class="btn btn-primary" onclick="changePassword()">שנה סיסמה</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h2>📥 ייצוא נתונים</h2>
+          <p style="color:var(--text-light);margin-bottom:12px">הורד את כל הנתונים כקובץ JSON</p>
+          <button class="btn btn-success" onclick="exportData()">💾 ייצוא JSON</button>
+        </div>
+
+        <div class="admin-card">
+          <h2>🗑️ מחיקת נתונים</h2>
+          <p style="color:var(--text-light);margin-bottom:12px">מחק את כל לוגי החיפוש והסטטיסטיקות</p>
+          <button class="btn btn-danger" onclick="clearData()">🗑️ מחק הכל</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = 'https://catalog-analytics.ohadf1976.workers.dev';
+let TOKEN = localStorage.getItem('catalog_admin_token') || '';
+let searchData = null;
+let allRecent = [];
+
+// Country code to flag
+function countryFlag(code) {
+  if (!code || code === 'XX') return '🌐';
+  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
+
+// Country code to name
+const COUNTRY_NAMES = {
+  IL:'ישראל', US:'ארה"ב', BR:'ברזיל', GB:'בריטניה', DE:'גרמניה', FR:'צרפת',
+  RU:'רוסיה', IN:'הודו', CA:'קנדה', AU:'אוסטרליה', ES:'ספרד', IT:'איטליה',
+  NL:'הולנד', PL:'פולין', TR:'טורקיה', JP:'יפן', KR:'קוריאה', CN:'סין',
+  MX:'מקסיקו', AR:'ארגנטינה', CO:'קולומביה', CL:'צ׳ילה', UA:'אוקראינה',
+  SA:'סעודיה', AE:'אמירויות', EG:'מצרים', ZA:'דרום אפריקה', XX:'לא ידוע'
+};
+function countryName(code) { return COUNTRY_NAMES[code] || code; }
+
+// Time ago
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'עכשיו';
+  if (mins < 60) return mins + ' דק׳';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + ' שע׳';
+  const days = Math.floor(hrs / 24);
+  return days + ' ימים';
+}
+
+// Type label
+function typeLabel(type) {
+  if (type === 'search') return '🔍 חיפוש';
+  if (type === 'click') return '🖱️ קליק';
+  return '👁️ צפייה';
+}
+
+// === Login ===
+async function doLogin() {
+  const pw = document.getElementById('loginPassword').value;
+  if (!pw) return;
+  try {
+    const res = await fetch(API_BASE + '/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+    if (data.token) {
+      TOKEN = data.token;
+      localStorage.setItem('catalog_admin_token', TOKEN);
+      showAdmin();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  } catch (e) {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginError').textContent = 'שגיאת חיבור';
+  }
+}
+
+function doLogout() {
+  TOKEN = '';
+  localStorage.removeItem('catalog_admin_token');
+  location.reload();
+}
+
+async function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'block';
+  await loadData();
+}
+
+// === API Calls ===
+async function apiGet(path) {
+  const res = await fetch(API_BASE + path, {
+    headers: { 'Authorization': 'Bearer ' + TOKEN }
+  });
+  if (res.status === 401) { doLogout(); return null; }
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+    body: JSON.stringify(body)
+  });
+  if (res.status === 401) { doLogout(); return null; }
+  return res.json();
+}
+
+// === Load Data ===
+async function loadData() {
+  try {
+    searchData = await apiGet('/admin/searches');
+    if (!searchData) return;
+
+    // Stats
+    document.getElementById('statTotal').textContent = searchData.total.toLocaleString();
+    document.getElementById('statSearches').textContent = searchData.searchCount.toLocaleString();
+    document.getElementById('statViews').textContent = searchData.viewCount.toLocaleString();
+    document.getElementById('statClicks').textContent = searchData.clickCount.toLocaleString();
+
+    // Top queries chart
+    renderBarChart('topQueriesChart', searchData.topQueries.map(q => ({
+      label: q.query,
+      value: q.count
+    })));
+
+    // Countries chart
+    renderBarChart('countriesChart', searchData.topCountries.map(c => ({
+      label: countryFlag(c.country) + ' ' + countryName(c.country),
+      value: c.count
+    })));
+
+    // Cities chart
+    renderBarChart('citiesChart', searchData.topCities.map(c => ({
+      label: c.city || 'לא ידוע',
+      value: c.count
+    })));
+
+    // Recent table
+    allRecent = searchData.recent || [];
+    renderRecentTable(allRecent);
+
+    // Daily stats
+    const analytics = await apiGet('/admin/analytics');
+    if (analytics) renderDailyCharts(analytics.dailyStats);
+
+  } catch (e) {
+    console.error('Load error:', e);
+    showToast('שגיאה בטעינת נתונים', 'error');
+  }
+}
+
+// === Render Bar Chart ===
+function renderBarChart(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items || items.length === 0) {
+    el.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px">אין נתונים עדיין</p>';
+    return;
+  }
+  const max = Math.max(...items.map(i => i.value));
+  el.innerHTML = items.map(item => {
+    const pct = max > 0 ? (item.value / max * 100) : 0;
+    return `<div class="bar-row">
+      <span class="bar-label">${item.label}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%">
+          <span class="bar-value">${item.value}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// === Render Recent Table ===
+function renderRecentTable(items) {
+  const tbody = document.getElementById('recentTableBody');
+  if (!items || items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">אין נתונים</td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.slice(0, 100).map(item => `<tr>
+    <td><strong>${item.query || '-'}</strong></td>
+    <td>${typeLabel(item.type)}</td>
+    <td>${countryFlag(item.country)} ${countryName(item.country)}</td>
+    <td>${item.city || '-'}</td>
+    <td style="white-space:nowrap">${timeAgo(item.timestamp)}</td>
+  </tr>`).join('');
+}
+
+function filterRecent(q) {
+  const filtered = q ? allRecent.filter(r =>
+    (r.query || '').includes(q) || (r.city || '').includes(q) || (r.country || '').includes(q)
+  ) : allRecent;
+  renderRecentTable(filtered);
+}
+
+// === Render Daily Charts ===
+function renderDailyCharts(dailyStats) {
+  if (!dailyStats || Object.keys(dailyStats).length === 0) {
+    document.getElementById('dailyChartContainer').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px">אין נתונים עדיין</p>';
+    document.getElementById('dailyViewsContainer').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px">אין נתונים עדיין</p>';
+    return;
+  }
+
+  // Get last 30 days sorted
+  const days = Object.keys(dailyStats).sort().slice(-30);
+
+  // Searches chart
+  const searchMax = Math.max(...days.map(d => dailyStats[d].searches || 0), 1);
+  document.getElementById('dailyChartContainer').innerHTML = `
+    <div class="daily-chart">${days.map(d => {
+      const val = dailyStats[d].searches || 0;
+      const h = Math.max((val / searchMax) * 140, 4);
+      const date = d.split('-').slice(1).join('/');
+      return `<div class="daily-bar" style="height:${h}px"><div class="tooltip">${date}: ${val} חיפושים</div></div>`;
+    }).join('')}</div>
+    <div class="daily-labels">${days.map(d => {
+      const date = d.split('-')[2];
+      return `<span>${date}</span>`;
+    }).join('')}</div>`;
+
+  // Views chart
+  const viewMax = Math.max(...days.map(d => dailyStats[d].views || 0), 1);
+  document.getElementById('dailyViewsContainer').innerHTML = `
+    <div class="daily-chart">${days.map(d => {
+      const val = dailyStats[d].views || 0;
+      const h = Math.max((val / viewMax) * 140, 4);
+      const date = d.split('-').slice(1).join('/');
+      return `<div class="daily-bar" style="height:${h}px;background:linear-gradient(to top, var(--success), #55efc4)"><div class="tooltip">${date}: ${val} צפיות</div></div>`;
+    }).join('')}</div>
+    <div class="daily-labels">${days.map(d => {
+      const date = d.split('-')[2];
+      return `<span>${date}</span>`;
+    }).join('')}</div>`;
+}
+
+// === Tab Switching ===
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// === Settings ===
+async function changePassword() {
+  const pw = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  if (pw.length < 4) return showToast('סיסמה חייבת להכיל לפחות 4 תווים', 'error');
+  if (pw !== confirm) return showToast('הסיסמאות לא תואמות', 'error');
+  const res = await apiPost('/admin/settings', { newPassword: pw });
+  if (res && res.ok) {
+    showToast('סיסמה שונתה בהצלחה', 'success');
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  }
+}
+
+async function exportData() {
+  const data = await apiGet('/admin/export');
+  if (!data) return;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'catalog_analytics_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  showToast('הנתונים יורדים...', 'success');
+}
+
+async function clearData() {
+  if (!confirm('האם אתה בטוח? כל הנתונים יימחקו!')) return;
+  const res = await apiPost('/admin/clear', {});
+  if (res && res.ok) {
+    showToast('הנתונים נמחקו', 'success');
+    await loadData();
+  }
+}
+
+// === Toast ===
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// === Init ===
+(async function() {
+  if (TOKEN) {
+    // Try auto-login with saved token
+    try {
+      const test = await fetch(API_BASE + '/admin/searches', {
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      if (test.ok) {
+        showAdmin();
+        return;
+      }
+    } catch (e) {}
+    // Token expired
+    TOKEN = '';
+    localStorage.removeItem('catalog_admin_token');
+  }
+})();
+</script>
+
+</body>
+</html>
