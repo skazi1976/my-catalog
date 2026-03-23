@@ -492,6 +492,40 @@
         .wa-product-btn:hover { background: #1da851; }
         .wa-product-btn svg { width: 16px; height: 16px; fill: white; }
 
+        .chat-seller-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #0088cc, #00aaff);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Rubik', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .chat-seller-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,136,204,0.3);
+        }
+        .chat-seller-btn .online-dot {
+            width: 8px; height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            display: inline-block;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         /* Auto popup */
         .wa-auto-popup {
             display: none;
@@ -2084,6 +2118,74 @@ s1.charset='UTF-8';
 s1.setAttribute('crossorigin','*');
 s0.parentNode.insertBefore(s1,s0);
 })();
+
+// Hide default Tawk widget - we use custom buttons
+Tawk_API.onLoad = function() {
+    Tawk_API.hideWidget();
+};
+
+// Store mapping loaded from stores.json
+var STORE_MAP = {};
+fetch('stores.json').then(function(r){return r.json()}).then(function(d){STORE_MAP=d; setTimeout(addChatButtons, 500);}).catch(function(){});
+
+function getStore(product) {
+    if (!product || !product.i || !product.i[0]) return '';
+    var m = product.i[0].match(/images\/(\d+)\//);
+    if (!m) return '';
+    var code = STORE_MAP[m[1]] || '';
+    if (code === 'X') return 'XUJO';
+    if (code === 'T') return 'TOP-B111';
+    if (code === 'Z') return 'ZAD2025';
+    return '';
+}
+
+// Add chat buttons to products
+function addChatButtons() {
+    if (!Object.keys(STORE_MAP).length) return;
+    document.querySelectorAll('.product-card').forEach(function(card, i) {
+        if (card.querySelector('.chat-seller-btn')) return;
+        var info = card.querySelector('.card-info');
+        if (!info || !PRODUCTS[i]) return;
+
+        var store = getStore(PRODUCTS[i]);
+        if (!store) return;
+
+        var btn = document.createElement('button');
+        btn.className = 'chat-seller-btn';
+        btn.dataset.store = store;
+        btn.innerHTML = '<span class="online-dot"></span> 💬 Chat with Seller';
+        info.appendChild(btn);
+    });
+}
+
+// Open chat with correct department
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.chat-seller-btn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    var store = btn.dataset.store;
+    var card = btn.closest('.product-card');
+    var title = card ? (card.querySelector('.card-title') || {}).textContent || '' : '';
+
+    Tawk_API.setAttributes({
+        'department': store,
+        'product': title.substring(0, 50)
+    }, function(error) {});
+
+    Tawk_API.showWidget();
+    Tawk_API.maximize();
+
+    // Send automatic first message
+    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title.substring(0, 60) + ' (Store: ' + store + ')');
+});
+
+// Inject buttons after products load
+var chatObserver = new MutationObserver(function() { addChatButtons(); });
+var grid = document.querySelector('.grid');
+if (grid) chatObserver.observe(grid, { childList: true, subtree: true });
+setTimeout(addChatButtons, 3000);
 </script>
 <!--End of Tawk.to Script-->
 </body>
