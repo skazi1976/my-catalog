@@ -1283,7 +1283,7 @@
                     <h4 style="margin-top:16px;">📋 שלבי ההזמנה</h4>
                     <div class="lb-step">
                         <span class="lb-step-num">1</span>
-                        <span>לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא</span>
+                        <span id="lbStep1Text">לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא</span>
                     </div>
                     <div class="lb-step">
                         <span class="lb-step-num">2</span>
@@ -1299,7 +1299,7 @@
                     </div>
                     <div class="lb-step">
                         <span class="lb-step-num">5</span>
-                        <span>לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט בעליבאבא</span>
+                        <span id="lbStep5Text">לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט בעליבאבא</span>
                     </div>
                     <p style="color:var(--accent);font-weight:600;font-size:15px;text-align:center;margin-top:16px;">
                         מאחלים לכם חוויית רכישה מהנה! 🎉
@@ -1309,7 +1309,7 @@
                     <p style="color:var(--text2);font-size:14px;">⚠️ אין קישור לפריט הזה.<br>ניתן לצפות באלבום המקורי ב-Yupoo.</p>
                 </div>
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
-                <a class="lb-buy-btn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
+                <a class="lb-buy-btn" id="lbAppBtn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
                 <a class="lb-buy-btn" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
             </div>
         </div>
@@ -1621,11 +1621,21 @@
             
             btn.href = link;
             btn.onclick = function(e) { e.preventDefault(); window.open(link, '_blank'); };
+            const isFlyLink = link && link.includes('flylinking.com');
+            const appBtn = document.getElementById('lbAppBtn');
+            const step1 = document.getElementById('lbStep1Text');
+            const step5 = document.getElementById('lbStep5Text');
             if (hasAffiliate) {
-                if (link && link.includes('flylinking.com')) {
+                if (isFlyLink) {
                     btn.textContent = '🛒 קנו עכשיו';
+                    appBtn.style.display = 'none';
+                    step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר ב-FLYLINK';
+                    step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט ב-FLYLINK';
                 } else {
                     btn.textContent = '🛒 קנו בעליבאבא';
+                    appBtn.style.display = '';
+                    step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא';
+                    step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט בעליבאבא';
                 }
                 btn.className = 'lb-buy-btn';
                 noLink.style.display = 'none';
@@ -1633,6 +1643,9 @@
                 btn.textContent = '📂 צפו באלבום המקורי';
                 btn.className = 'lb-buy-btn secondary';
                 noLink.style.display = 'block';
+                appBtn.style.display = '';
+                step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא';
+                step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט בעליבאבא';
             }
             
             // Build thumbnail dots
