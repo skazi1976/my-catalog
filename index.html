@@ -1308,6 +1308,14 @@
                 <div id="lbNoLink" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;text-align:center;">
                     <p style="color:var(--text2);font-size:14px;">⚠️ אין קישור לפריט הזה.<br>ניתן לצפות באלבום המקורי ב-Yupoo.</p>
                 </div>
+                <div id="lbCoupon" style="display:none;background:linear-gradient(135deg,#1a3a1a,#0d2b0d);border:2px dashed #4CAF50;border-radius:14px;padding:15px;margin-bottom:15px;text-align:center;">
+                    <div style="color:#4CAF50;font-size:13px;margin-bottom:5px">🎁 קופון משלוח חינם</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px">
+                        <span id="lbCouponCode" style="font-size:22px;font-weight:800;color:#fff;letter-spacing:2px;font-family:monospace"></span>
+                        <button onclick="copyCode()" style="background:#4CAF50;color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:Heebo">📋 העתק</button>
+                    </div>
+                    <div style="color:#888;font-size:11px;margin-top:5px">הזינו את הקופון בעמוד התשלום ב-FlyLink</div>
+                </div>
                 <a class="lb-buy-btn" id="lbBuyBtn" href="#" target="_blank">🛒 קנו בעליבאבא</a>
                 <a class="lb-buy-btn" id="lbAppBtn" href="https://offer.alibaba.com/cps/6k42qbdm" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#FF6A00,#FF8C00);">📲 הורידו את אפליקציית עליבאבא</a>
                 <a class="lb-buy-btn" href="https://wa.me/972502373019" target="_blank" style="margin-top:12px;background:linear-gradient(135deg,#25D366,#128C7E);">💬 שאלות? דברו איתנו בוואטסאפ</a>
@@ -1592,6 +1600,15 @@
         let lbImages = [];
         let lbIndex = 0;
         
+        function copyCode() {
+            const code = document.getElementById('lbCouponCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                btn.textContent = '✅ הועתק!';
+                setTimeout(() => btn.textContent = '📋 העתק', 2000);
+            });
+        }
+
         function openLightbox(productIndex) {
             currentProductIndex = productIndex;
             const product = PRODUCTS[productIndex];
@@ -1626,12 +1643,22 @@
             const step1 = document.getElementById('lbStep1Text');
             const step5 = document.getElementById('lbStep5Text');
             if (hasAffiliate) {
+                const couponEl = document.getElementById('lbCoupon');
+                const couponCode = document.getElementById('lbCouponCode');
                 if (isFlyLink) {
                     btn.textContent = '🛒 קנו עכשיו';
                     appBtn.style.display = 'none';
                     step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר ב-FLYLINK';
                     step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט ב-FLYLINK';
+                    // Show coupon if product has one
+                    if (product.coupon) {
+                        couponEl.style.display = 'block';
+                        couponCode.textContent = product.coupon;
+                    } else {
+                        couponEl.style.display = 'none';
+                    }
                 } else {
+                    couponEl.style.display = 'none';
                     btn.textContent = '🛒 קנו בעליבאבא';
                     appBtn.style.display = '';
                     step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא';
