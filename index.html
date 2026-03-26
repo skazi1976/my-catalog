@@ -1620,7 +1620,11 @@
             btn.href = link;
             btn.onclick = function(e) { e.preventDefault(); window.open(link, '_blank'); };
             if (hasAffiliate) {
-                btn.textContent = '🛒 קנו בעליבאבא';
+                if (link && link.includes('flylinking.com')) {
+                    btn.textContent = '🛒 קנו עכשיו';
+                } else {
+                    btn.textContent = '🛒 קנו בעליבאבא';
+                }
                 btn.className = 'lb-buy-btn';
                 noLink.style.display = 'none';
             } else {
