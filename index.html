@@ -1513,14 +1513,19 @@
                 const nav = imgs.length > 1 ? '<div class="gallery-nav"><button class="prev" onclick="event.stopPropagation();prevImg(this)">‹</button><button class="next" onclick="event.stopPropagation();nextImg(this)">›</button></div>' : '';
                 const badge = hasAff ? '<span class="badge badge-aff">✓ קישור</span>' : '';
                 const priceHtml = p.p ? '<div class="price">' + p.p + '</div>' : '';
+                const safeTitle = (p.t || '').replace(/<[^>]*>/g, '').trim();
+                const isFlyLink = p.l && p.l.includes('flylinking.com');
+                const buyBtn = isFlyLink
+                    ? '<a class="buy-btn" href="' + p.l + '" target="_blank" onclick="event.stopPropagation()">🛒 קנו עכשיו</a>'
+                    : '<div class="buy-btn" onclick="openLightbox(' + pi + ')">👁 צפו בפריט</div>';
                 html += '<div class="product-card visible" style="animation-delay:' + Math.min(ci * 0.03, 0.6) + 's">' +
                     '<div class="card-gallery" onclick="openLightbox(' + pi + ')" style="cursor:pointer">' +
                     gallery + nav +
                     '<div class="img-count">' + imgs.length + ' 📷</div>' +
                     badge + '</div>' +
-                    '<div class="card-info"><h3 class="card-title">' + p.t + '</h3>' +
+                    '<div class="card-info"><h3 class="card-title">' + safeTitle + '</h3>' +
                     priceHtml +
-                    '<div class="buy-btn" onclick="openLightbox(' + pi + ')">👁 צפו בפריט</div></div></div>';
+                    buyBtn + '</div></div>';
             });
             grid.innerHTML = html;
         }
