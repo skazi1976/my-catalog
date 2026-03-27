@@ -1362,19 +1362,125 @@
 
         // Brand chips - auto-detect from titles (including abbreviations)
         const BRAND_MAP = {
-            'Nike': ['nike'],
-            'Adidas': ['adidas'],
-            'Jordan': ['jordan'],
+            'Nike': ['nike', 'nk'],
+            'Adidas': ['adidas', 'adid'],
+            'Jordan': ['jordan', 'aj'],
             'Puma': ['puma'],
-            'New Balance': ['new balance', 'nb '],
+            'New Balance': ['new balance', 'nb'],
             'Yeezy': ['yeezy'],
             'Gucci': ['gucci'],
-            'Louis Vuitton': ['louis vuitton', 'lv '],
+            'Louis Vuitton': ['louis vuitton', 'lv'],
             'Balenciaga': ['balenciaga'],
-            'Dior': ['dior', 'dr '],
-            'The North Face': ['north face', 'tnf '],
-            'Veja': ['veja', 've ']
+            'Dior': ['dior', 'diro'],
+            'The North Face': ['north face', 'tnf'],
+            'Veja': ['veja', 've '],
+            'UGG': ['ugg'],
+            'Chanel': ['chanel'],
+            'Polo Ralph Lauren': ['polo', 'ralph lauren'],
+            'Prada': ['prada'],
+            'Moncler': ['moncler', 'mocler'],
+            'Tommy Hilfiger': ['tommy'],
+            'Burberry': ['burberry'],
+            'YSL': ['ysl'],
+            'Dr. Martens': ['martens', 'dr.martens', 'dr martens'],
+            'Miu Miu': ['miumiu'],
+            'Hermes': ['hermes'],
+            'Coach': ['coach'],
+            'Lacoste': ['lacoste'],
+            'Asics': ['asics'],
+            'Alo Yoga': ['alo'],
+            'Celine': ['celine', 'ce'],
+            'Rolex': ['rolex', 'role'],
+            'Versace': ['versace'],
+            'Alexander Wang': ['alexander'],
+            'Birkenstock': ['birkenstock', 'bk'],
+            'Dolce & Gabbana': ['dolce'],
+            'Rado': ['rado'],
+            'Converse': ['converse', 'conv'],
+            'Salomon': ['salomon'],
+            'Loewe': ['loewe'],
+            'McQueen': ['mcqueen'],
+            'Chloe': ['chloe'],
+            'MLB': ['mlb'],
+            'Hublot': ['hublot'],
+            'Patek Philippe': ['patek', 'philippe'],
+            'Air Force': ['air fo', 'af']
         };
+
+        // Hebrew + abbreviation search aliases → map to terms in product data
+        const SEARCH_ALIASES = {
+            'נייקי': ['nike', 'nk'],
+            'אדידס': ['adidas', 'adid'],
+            'ג\'ורדן': ['jordan', 'aj'],
+            'גורדן': ['jordan', 'aj'],
+            'פומה': ['puma'],
+            'ניו באלאנס': ['new balance', 'nb'],
+            'גוצ\'י': ['gucci'],
+            "גוצ'י": ['gucci'],
+            'גוצי': ['gucci'],
+            'לואי ויטון': ['louis vuitton', 'lv'],
+            'שאנל': ['chanel'],
+            'דיור': ['dior', 'diro'],
+            'נורט פייס': ['north face', 'tnf'],
+            'דה נורט פייס': ['north face', 'tnf'],
+            'בלנסיאגה': ['balenciaga'],
+            'בלנסיגה': ['balenciaga'],
+            'פראדה': ['prada'],
+            'ברברי': ['burberry'],
+            'מונקליר': ['moncler', 'mocler'],
+            'טומי הילפיגר': ['tommy'],
+            'טומי': ['tommy'],
+            'סלין': ['celine', 'ce'],
+            'ראלף לורן': ['polo', 'ralph lauren'],
+            'פולו': ['polo'],
+            'מיו מיו': ['miumiu'],
+            'רולקס': ['rolex', 'role'],
+            'בירקנסטוק': ['birkenstock', 'bk'],
+            'בירקנשטוק': ['birkenstock', 'bk'],
+            "דולצ'ה": ['dolce'],
+            'דולצה': ['dolce'],
+            'דולצ\'ה וגבנה': ['dolce'],
+            'דר מרטינס': ['martens', 'dr.martens'],
+            'מרטינס': ['martens', 'dr.martens'],
+            'אלו יוגה': ['alo'],
+            'אלו': ['alo'],
+            'אלכסנדר וונג': ['alexander'],
+            "ורסצ'ה": ['versace'],
+            'ורסצה': ['versace'],
+            'רדו': ['rado'],
+            'אג': ['ugg'],
+            'אגג': ['ugg'],
+            'הרמס': ['hermes'],
+            'קואץ\'': ['coach'],
+            'קואצ': ['coach'],
+            'לקוסט': ['lacoste'],
+            'אסיקס': ['asics'],
+            'איזי': ['yeezy'],
+            'ווג': ['veja', 've '],
+            'קונברס': ['converse', 'conv'],
+            'סלומון': ['salomon'],
+            'לואווה': ['loewe'],
+            'מקווין': ['mcqueen'],
+            'אלכסנדר מקווין': ['mcqueen'],
+            'קלואה': ['chloe'],
+            'הובלו': ['hublot'],
+            'פטק פיליפ': ['patek', 'philippe'],
+            'אייר פורס': ['air fo', 'af'],
+            'נעליים': ['nike', 'adidas', 'jordan', 'puma', 'nb', 'converse', 'asics', 'salomon', 'ugg', 'birkenstock', 'martens', 'veja'],
+            'שעונים': ['rolex', 'role', 'rado', 'hublot', 'patek', 'philippe'],
+            'תיקים': ['lv', 'gucci', 'chanel', 'prada', 'coach', 'hermes', 'loewe', 'chloe', 'miumiu']
+        };
+
+        function resolveSearchQuery(query) {
+            // Check if query matches any alias (exact or starts-with)
+            if (SEARCH_ALIASES[query]) return SEARCH_ALIASES[query];
+            // Check partial match for longer Hebrew terms
+            for (var alias in SEARCH_ALIASES) {
+                if (alias.startsWith(query) && query.length >= 2) return SEARCH_ALIASES[alias];
+                if (query.startsWith(alias)) return SEARCH_ALIASES[alias];
+            }
+            return null;
+        }
 
         function brandMatch(title, keys) {
             return keys.some(k => title.includes(k));
@@ -1466,12 +1572,19 @@
 
         function filterProducts() {
             if (!PRODUCTS.length) return;
-            const query = document.getElementById('searchBox').value.toLowerCase();
+            const query = document.getElementById('searchBox').value.toLowerCase().trim();
+
+            // Resolve Hebrew/abbreviation aliases
+            const aliasTerms = query ? resolveSearchQuery(query) : null;
 
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
                 const searchText = (p.f + ' ' + (p.t || '')).toLowerCase();
-                const matchSearch = !query || searchText.includes(query);
+                let matchSearch = !query || searchText.includes(query);
+                // Also check alias terms if direct search didn't match
+                if (!matchSearch && aliasTerms) {
+                    matchSearch = aliasTerms.some(term => searchText.includes(term));
+                }
                 const matchBrand = !currentBrand || brandMatch(searchText, BRAND_MAP[currentBrand] || [currentBrand]);
                 const hasLink = p.a ? 'yes' : 'no';
                 const matchFilter = currentFilter === 'all' || hasLink === currentFilter;
