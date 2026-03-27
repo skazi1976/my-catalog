@@ -1362,7 +1362,7 @@
 
         // Brand chips - auto-detect from titles (including abbreviations)
         const BRAND_MAP = {
-            'Nike': ['nike', 'nk'],
+            'Nike': ['nike'],
             'Adidas': ['adidas', 'adid'],
             'Jordan': ['jordan', 'aj'],
             'Puma': ['puma'],
@@ -1409,7 +1409,7 @@
 
         // Hebrew + abbreviation search aliases → map to terms in product data
         const SEARCH_ALIASES = {
-            'נייקי': ['nike', 'nk'],
+            'נייקי': ['nike'],
             'אדידס': ['adidas', 'adid'],
             'ג\'ורדן': ['jordan', 'aj'],
             'גורדן': ['jordan', 'aj'],
@@ -1580,10 +1580,11 @@
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
                 const searchText = (p.f + ' ' + (p.t || '')).toLowerCase();
+                const titleText = (p.t || '').toLowerCase();
                 let matchSearch = !query || searchText.includes(query);
-                // Also check alias terms if direct search didn't match
+                // For alias matches, search title+filename without URL to avoid false matches
                 if (!matchSearch && aliasTerms) {
-                    matchSearch = aliasTerms.some(term => searchText.includes(term));
+                    matchSearch = aliasTerms.some(term => titleText.includes(term));
                 }
                 const matchBrand = !currentBrand || brandMatch(searchText, BRAND_MAP[currentBrand] || [currentBrand]);
                 const hasLink = p.a ? 'yes' : 'no';
