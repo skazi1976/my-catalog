@@ -2394,7 +2394,7 @@ document.addEventListener('click', function(e) {
     Tawk_API.maximize();
 
     // Send automatic first message with product links
-    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title.substring(0, 60) + '\n🔗 Product: ' + productLink + (buyLink ? '\n🛒 Buy: ' + buyLink : ''));
+    Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
 });
 
 // Open chat from lightbox
@@ -2412,7 +2412,7 @@ function openSellerChat() {
 
     Tawk_API.showWidget();
     Tawk_API.maximize();
-    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title + '\n🔗 Product: ' + productLink + (buyLink ? '\n🛒 Buy: ' + buyLink : ''));
+    Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
 }
 
 // Inject buttons after products load
