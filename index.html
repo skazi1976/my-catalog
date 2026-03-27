@@ -1383,7 +1383,7 @@
         function buildBrandChips() {
             const counts = {};
             Object.entries(BRAND_MAP).forEach(([name, keys]) => {
-                const c = PRODUCTS.filter(p => brandMatch(p.f, keys)).length;
+                const c = PRODUCTS.filter(p => brandMatch((p.f + ' ' + (p.t || '')).toLowerCase(), keys)).length;
                 if (c > 0) counts[name] = c;
             });
             const container = document.getElementById('brands');
@@ -1470,8 +1470,9 @@
 
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
-                const matchSearch = !query || p.f.includes(query);
-                const matchBrand = !currentBrand || brandMatch(p.f, BRAND_MAP[currentBrand] || [currentBrand]);
+                const searchText = (p.f + ' ' + (p.t || '')).toLowerCase();
+                const matchSearch = !query || searchText.includes(query);
+                const matchBrand = !currentBrand || brandMatch(searchText, BRAND_MAP[currentBrand] || [currentBrand]);
                 const hasLink = p.a ? 'yes' : 'no';
                 const matchFilter = currentFilter === 'all' || hasLink === currentFilter;
                 if (matchSearch && matchBrand && matchFilter) filteredIndices.push(i);
