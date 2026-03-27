@@ -1573,19 +1573,29 @@
         });
         
         // === Direct Product Linking ===
-        function getProductId(product) {
-            if (!product || !product.i || !product.i[0]) return '';
+        function getProductId(product, idx) {
+            if (!product || !product.i || !product.i[0]) return idx !== undefined ? 'idx' + idx : '';
             var m = product.i[0].match(/images\/(\d+)\//);
-            return m ? m[1] : '';
+            if (m) return m[1];
+            // FlyLink products: use xuxu hash or array index
+            var m2 = product.i[0].match(/xuxu\/([a-f0-9]+)_/);
+            if (m2) return 'x' + m2[1];
+            return idx !== undefined ? 'idx' + idx : '';
         }
         function findProductByAlbumId(albumId) {
+            // Direct index lookup
+            if (albumId.startsWith('idx')) {
+                var idx = parseInt(albumId.substring(3));
+                return (idx >= 0 && idx < PRODUCTS.length) ? idx : -1;
+            }
             for (var i = 0; i < PRODUCTS.length; i++) {
-                if (getProductId(PRODUCTS[i]) === albumId) return i;
+                if (getProductId(PRODUCTS[i], i) === albumId) return i;
             }
             return -1;
         }
         function getProductDirectLink(product) {
-            var id = getProductId(product);
+            var idx = PRODUCTS.indexOf(product);
+            var id = getProductId(product, idx >= 0 ? idx : undefined);
             return id ? (window.location.origin + window.location.pathname + '#product=' + id) : '';
         }
         window.addEventListener('hashchange', function() {
@@ -1690,7 +1700,7 @@
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
-            var albumId = getProductId(product);
+            var albumId = getProductId(product, productIndex);
             if (albumId) history.replaceState(null, '', '#product=' + albumId);
         }
         
