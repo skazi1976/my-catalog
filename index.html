@@ -2381,6 +2381,9 @@ document.addEventListener('click', function(e) {
     var store = btn.dataset.store;
     var card = btn.closest('.product-card');
     var title = card ? (card.querySelector('.card-title') || {}).textContent || '' : '';
+    var cardIdx = card ? parseInt(card.dataset.idx) : -1;
+    var buyLink = (cardIdx >= 0 && PRODUCTS[cardIdx]) ? PRODUCTS[cardIdx].l : '';
+    var productLink = cardIdx >= 0 ? 'https://hacatalog.com/#product=' + getProductId(PRODUCTS[cardIdx], cardIdx) : window.location.href;
 
     Tawk_API.setAttributes({
         'department': store,
@@ -2390,8 +2393,8 @@ document.addEventListener('click', function(e) {
     Tawk_API.showWidget();
     Tawk_API.maximize();
 
-    // Send automatic first message
-    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title.substring(0, 60) + ' (Store: ' + store + ')');
+    // Send automatic first message with product links
+    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title.substring(0, 60) + '\n🔗 Product: ' + productLink + (buyLink ? '\n🛒 Buy: ' + buyLink : ''));
 });
 
 // Open chat from lightbox
@@ -2399,6 +2402,8 @@ function openSellerChat() {
     var chatBtn = document.getElementById('lbChatBtn');
     var store = chatBtn.dataset.store || 'xuxuxuxux';
     var title = chatBtn.dataset.title || '';
+    var productLink = window.location.href;
+    var buyLink = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].l : '';
 
     Tawk_API.setAttributes({
         'department': store,
@@ -2407,7 +2412,7 @@ function openSellerChat() {
 
     Tawk_API.showWidget();
     Tawk_API.maximize();
-    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title + ' (Store: ' + store + ')');
+    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title + '\n🔗 Product: ' + productLink + (buyLink ? '\n🛒 Buy: ' + buyLink : ''));
 }
 
 // Inject buttons after products load
