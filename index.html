@@ -1267,6 +1267,7 @@
                     <button onclick="shareProductTelegram()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:#0088cc;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📨 טלגרם</button>
                     <button onclick="copyProductLink()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);">📋 העתיקו</button>
                 </div>
+                <button class="lb-buy-btn" id="lbChatBtn" onclick="openSellerChat()" style="display:none;margin-bottom:12px;background:linear-gradient(135deg,#00c853,#009624);border:none;cursor:pointer;color:#fff;font-size:16px;width:100%;padding:14px 20px;border-radius:12px;font-weight:bold;">💬 צור קשר עם המוכר <span style="display:inline-block;width:8px;height:8px;background:#0f0;border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite;"></span></button>
                 <div class="lb-how-to">
                     <div style="text-align:center;padding:12px;margin-bottom:16px;background:linear-gradient(135deg,rgba(0,212,170,0.1),rgba(255,215,0,0.1));border-radius:12px;border:1px solid var(--border);">
                         <span style="font-size:20px;">🚚</span>
@@ -1471,10 +1472,28 @@
             'תיקים': ['lv', 'gucci', 'chanel', 'prada', 'coach', 'hermes', 'loewe', 'chloe', 'miumiu']
         };
 
+        // Category search: Hebrew terms → product category field (c)
+        const CATEGORY_ALIASES = {
+            'תיק': 'bags', 'תיקים': 'bags', 'תיקי': 'bags', 'ארנק': 'bags', 'ארנקים': 'bags', 'תרמיל': 'bags',
+            'נעל': 'shoes', 'נעליים': 'shoes', 'נעלי': 'shoes', 'סניקרס': 'shoes', 'מגפיים': 'shoes', 'סנדלים': 'shoes', 'כפכפים': 'shoes',
+            'שעון': 'watches', 'שעונים': 'watches', 'שעוני': 'watches',
+            'בגד': 'clothing', 'בגדים': 'clothing', 'חולצה': 'clothing', 'חולצות': 'clothing',
+            'מכנסיים': 'clothing', 'שמלה': 'clothing', 'שמלות': 'clothing', 'ג\'קט': 'clothing',
+            'ג\'אקט': 'clothing', 'מעיל': 'clothing', 'מעילים': 'clothing', 'סווטשירט': 'clothing',
+            'אקססוריז': 'accessories', 'אביזרים': 'accessories', 'חגורה': 'accessories', 'חגורות': 'accessories',
+            'משקפיים': 'accessories', 'משקפי': 'accessories', 'כובע': 'accessories', 'כובעים': 'accessories',
+            'צעיף': 'accessories', 'עניבה': 'accessories'
+        };
+
         function resolveSearchQuery(query) {
-            // Check if query matches any alias (exact or starts-with)
+            // Check category aliases first (uses product 'c' field)
+            if (CATEGORY_ALIASES[query]) return {category: CATEGORY_ALIASES[query]};
+            // Check if query matches any brand alias (exact or starts-with)
             if (SEARCH_ALIASES[query]) return SEARCH_ALIASES[query];
             // Check partial match for longer Hebrew terms
+            for (var alias in CATEGORY_ALIASES) {
+                if (alias.startsWith(query) && query.length >= 2) return {category: CATEGORY_ALIASES[alias]};
+            }
             for (var alias in SEARCH_ALIASES) {
                 if (alias.startsWith(query) && query.length >= 2) return SEARCH_ALIASES[alias];
                 if (query.startsWith(alias)) return SEARCH_ALIASES[alias];
@@ -1575,16 +1594,26 @@
             const query = document.getElementById('searchBox').value.toLowerCase().trim();
 
             // Resolve Hebrew/abbreviation aliases
-            const aliasTerms = query ? resolveSearchQuery(query) : null;
+            const resolved = query ? resolveSearchQuery(query) : null;
+            const isCategory = resolved && resolved.category;
+            const aliasTerms = isCategory ? null : (Array.isArray(resolved) ? resolved : null);
 
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
                 const searchText = (p.f + ' ' + (p.t || '')).toLowerCase();
                 const titleText = (p.t || '').toLowerCase();
-                let matchSearch = !query || searchText.includes(query);
-                // For alias matches, search title+filename without URL to avoid false matches
-                if (!matchSearch && aliasTerms) {
-                    matchSearch = aliasTerms.some(term => titleText.includes(term));
+                let matchSearch;
+                if (!query) {
+                    matchSearch = true;
+                } else if (isCategory) {
+                    // Category search: match by product category field
+                    matchSearch = (p.c === resolved.category);
+                } else {
+                    matchSearch = searchText.includes(query);
+                    // For alias matches, search title only to avoid URL false matches
+                    if (!matchSearch && aliasTerms) {
+                        matchSearch = aliasTerms.some(term => titleText.includes(term));
+                    }
                 }
                 const matchBrand = !currentBrand || brandMatch(searchText, BRAND_MAP[currentBrand] || [currentBrand]);
                 const hasLink = p.a ? 'yes' : 'no';
@@ -1814,6 +1843,17 @@
             lbGoTo(0);
             document.getElementById('lightboxOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
+            // Show/hide chat button based on store
+            var store = getStore(product);
+            var chatBtn = document.getElementById('lbChatBtn');
+            if (store === 'xuxuxuxux') {
+                chatBtn.style.display = '';
+                chatBtn.dataset.store = store;
+                chatBtn.dataset.title = (title || '').substring(0, 60);
+            } else {
+                chatBtn.style.display = 'none';
+            }
+
             var albumId = getProductId(product, productIndex);
             if (albumId) history.replaceState(null, '', '#product=' + albumId);
         }
@@ -2301,10 +2341,12 @@ fetch('stores.json').then(function(r){return r.json()}).then(function(d){STORE_M
 
 function getStore(product) {
     if (!product || !product.i || !product.i[0]) return '';
+    // xuxuxuxux products have images like r2.dev/xuxu/xxx.jpg
+    if (product.i[0].includes('/xuxu/')) return 'xuxuxuxux';
     var m = product.i[0].match(/images\/(\d+)\//);
     if (!m) return '';
     var code = STORE_MAP[m[1]] || '';
-    if (code === 'X') return 'XUJO';
+    if (code === 'X') return 'xuxuxuxux';
     if (code === 'T') return 'TOP-B111';
     if (code === 'Z') return 'ZAD2025';
     return '';
@@ -2351,6 +2393,22 @@ document.addEventListener('click', function(e) {
     // Send automatic first message
     Tawk_API.sendMessage('Hi, I\'m interested in: ' + title.substring(0, 60) + ' (Store: ' + store + ')');
 });
+
+// Open chat from lightbox
+function openSellerChat() {
+    var chatBtn = document.getElementById('lbChatBtn');
+    var store = chatBtn.dataset.store || 'xuxuxuxux';
+    var title = chatBtn.dataset.title || '';
+
+    Tawk_API.setAttributes({
+        'department': store,
+        'product': title.substring(0, 50)
+    }, function(error) {});
+
+    Tawk_API.showWidget();
+    Tawk_API.maximize();
+    Tawk_API.sendMessage('Hi, I\'m interested in: ' + title + ' (Store: ' + store + ')');
+}
 
 // Inject buttons after products load
 var chatObserver = new MutationObserver(function() { addChatButtons(); });
