@@ -363,6 +363,33 @@
             z-index: 10;
         }
         .lightbox-nav:hover { background: rgba(0,0,0,0.8); }
+        .lightbox-wa-share {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #25D366;
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .wa-share-btn {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            background: #25D366;
+            color: #fff !important;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
         .lightbox-prev { left: 20px; }
         .lightbox-next { right: 20px; }
         .lightbox-title {
@@ -703,6 +730,7 @@
     <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)">&#8249;</button>
     <img class="lightbox-img" id="lightboxImg" src="" alt="">
     <div class="lightbox-title" id="lightboxTitle"></div>
+    <a class="lightbox-wa-share" id="lightboxWAShare" href="#" target="_blank">💬 שתפו לחברה בוואטסאפ</a>
 </div>
 
 <!-- ===== TOAST ===== -->
@@ -780,6 +808,7 @@ function renderProducts() {
             <div class="card-info">
                 <div class="card-title">${p.title}</div>
                 <div class="card-price">₪${p.price} <span>כולל משלוח</span></div>
+                <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.href)}" target="_blank" class="wa-share-btn" onclick="event.stopPropagation()">💬 שתפו לחברה</a>
                 <a href="${p.link}" target="_blank" rel="noopener" class="buy-btn">🛒 לרכישה</a>
             </div>
         </div>
@@ -848,6 +877,7 @@ function showLbImage() {
 
     const counter = currentLbImages.length > 1 ? ` (${currentLbImage + 1}/${currentLbImages.length})` : '';
     document.getElementById('lightboxTitle').textContent = p.title + counter;
+    document.getElementById('lightboxWAShare').href = 'https://wa.me/?text=' + encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.href);
 }
 
 function closeLightbox() {
