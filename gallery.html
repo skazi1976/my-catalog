@@ -828,6 +828,10 @@ function renderProducts() {
                 <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + i)}" target="_blank" class="wa-share-btn" onclick="event.stopPropagation()">💬 שתפו לחברה</a>
                 <button class="copy-product-link" onclick="event.stopPropagation();copyProductLink(${i})">🔗 העתק קישור</button>
                 <a href="${p.link}" target="_blank" rel="noopener" class="buy-btn">🛒 לרכישה</a>
+                ${IS_ADMIN ? `<div class="admin-btns" style="display:flex;gap:6px;margin-top:6px;">
+                    <button onclick="event.stopPropagation();editProduct(${i})" style="flex:1;padding:8px;border:1px solid #ff0;background:transparent;color:#ff0;border-radius:8px;cursor:pointer;font-size:13px;">✏️ ערוך</button>
+                    <button onclick="event.stopPropagation();deleteProduct(${i})" style="flex:1;padding:8px;border:1px solid #f44;background:transparent;color:#f44;border-radius:8px;cursor:pointer;font-size:13px;">🗑️ מחק</button>
+                </div>` : ''}
             </div>
         </div>
     `).join('');
@@ -946,6 +950,74 @@ function copyProductLink(index) {
         document.body.removeChild(ta);
         showToast('✅ קישור למוצר הועתק!');
     });
+}
+
+// Edit product (admin)
+function editProduct(index) {
+    const p = PRODUCTS[index];
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+        <div style="background:#1a1a2e;border-radius:16px;padding:24px;max-width:500px;width:100%;direction:rtl;max-height:90vh;overflow-y:auto;">
+            <h3 style="color:#ff8c40;margin-bottom:16px;font-family:Heebo;">✏️ עריכת מוצר</h3>
+            <label style="color:#aaa;font-size:13px;">שם המוצר</label>
+            <input id="editTitle" value="${p.title.replace(/"/g,'&quot;')}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;direction:ltr;">
+            <label style="color:#aaa;font-size:13px;">מחיר (₪)</label>
+            <input id="editPrice" type="number" value="${p.price}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;">
+            <label style="color:#aaa;font-size:13px;">קישור רכישה</label>
+            <input id="editLink" value="${p.link || ''}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;direction:ltr;">
+            <label style="color:#aaa;font-size:13px;">מחיר Zara מקורי (₪)</label>
+            <input id="editZaraPrice" type="number" value="${p.zaraPrice || ''}" style="width:100%;padding:10px;margin:6px 0 16px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;">
+            <div style="display:flex;gap:10px;">
+                <button onclick="saveEdit(${index})" style="flex:1;padding:12px;background:linear-gradient(135deg,#00e676,#00c853);border:none;color:#000;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">💾 שמור</button>
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:10px;font-size:16px;cursor:pointer;">ביטול</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+async function saveEdit(index) {
+    const title = document.getElementById('editTitle').value;
+    const price = parseInt(document.getElementById('editPrice').value) || 0;
+    const link = document.getElementById('editLink').value;
+    const zaraPrice = parseInt(document.getElementById('editZaraPrice').value) || 0;
+
+    PRODUCTS[index].title = title;
+    PRODUCTS[index].price = price;
+    PRODUCTS[index].link = link;
+    if (zaraPrice) PRODUCTS[index].zaraPrice = zaraPrice;
+
+    try {
+        await fetch(API_BASE + '/gallery/products', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({products: PRODUCTS})
+        });
+        document.querySelector('div[style*="fixed"]').remove();
+        renderProducts();
+        showToast('✅ המוצר עודכן!');
+    } catch(e) {
+        showToast('❌ שגיאה: ' + e.message);
+    }
+}
+
+async function deleteProduct(index) {
+    const p = PRODUCTS[index];
+    if (!confirm('למחוק את "' + p.title + '"?')) return;
+
+    PRODUCTS.splice(index, 1);
+    try {
+        await fetch(API_BASE + '/gallery/products', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({products: PRODUCTS})
+        });
+        renderProducts();
+        showToast('🗑️ המוצר נמחק!');
+    } catch(e) {
+        showToast('❌ שגיאה: ' + e.message);
+    }
 }
 
 // Copy link
