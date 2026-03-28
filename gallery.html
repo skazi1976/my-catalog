@@ -350,8 +350,8 @@
             transform: translateY(-50%);
             width: 48px;
             height: 48px;
-            background: rgba(255,255,255,0.1);
-            border: none;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             color: #fff;
             font-size: 24px;
@@ -360,8 +360,9 @@
             align-items: center;
             justify-content: center;
             transition: background 0.2s;
+            z-index: 10;
         }
-        .lightbox-nav:hover { background: rgba(255,255,255,0.2); }
+        .lightbox-nav:hover { background: rgba(0,0,0,0.8); }
         .lightbox-prev { left: 20px; }
         .lightbox-next { right: 20px; }
         .lightbox-title {
