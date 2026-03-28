@@ -712,10 +712,24 @@
    PRODUCTS DATA - ADD YOUR PRODUCTS HERE
    Each product: { img: "URL", title: "שם", price: 99, link: "URL" }
    ========================================================== */
-const PRODUCTS = JSON.parse(localStorage.getItem('galleryProducts') || '[]');
+let PRODUCTS = [];
 
-function saveProducts() {
-    localStorage.setItem('galleryProducts', JSON.stringify(PRODUCTS));
+async function loadProducts() {
+    try {
+        const r = await fetch('https://ali-findme-api.ohadf1976.workers.dev/gallery/products');
+        const data = await r.json();
+        if (data.products) { PRODUCTS = data.products; renderProducts(); }
+    } catch(e) { console.error('Load error:', e); }
+}
+
+async function saveProducts() {
+    try {
+        await fetch('https://ali-findme-api.ohadf1976.workers.dev/gallery/products', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ products: PRODUCTS })
+        });
+    } catch(e) { console.error('Save error:', e); }
 }
 
 /* ========================================================== */
@@ -1074,8 +1088,8 @@ function adminExportJSON() {
     });
 }
 
-// Init
-renderProducts();
+// Init - load products from cloud
+loadProducts();
 </script>
 </body>
 </html>
