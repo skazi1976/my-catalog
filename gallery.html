@@ -724,7 +724,7 @@ function saveProducts() {
 const R2_CONFIG = {
     accountId: '84c63f0f65cabb8e5b611913c03a1188',
     bucketUrl: 'https://pub-0ad199860b5a4ce0b3fb483660b8a4ca.r2.dev',
-    uploadWorkerUrl: '' // Set your R2 upload worker URL here
+    uploadWorkerUrl: 'https://ali-findme-api.ohadf1976.workers.dev/upload'
 };
 
 const pageUrl = window.location.href;
@@ -1010,22 +1010,23 @@ async function adminUploadMultiple() {
 
         if (R2_CONFIG.uploadWorkerUrl) {
             try {
+                const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
+                const key = `gallery/${Date.now()}_${uploaded}.${ext}`;
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('folder', 'gallery');
+                formData.append('key', key);
                 const resp = await fetch(R2_CONFIG.uploadWorkerUrl, {
                     method: 'POST', body: formData
                 });
                 if (!resp.ok) throw new Error('Upload failed');
                 const data = await resp.json();
-                mediaUrl = data.url || `${R2_CONFIG.bucketUrl}/${data.key}`;
+                mediaUrl = `${R2_CONFIG.bucketUrl}/${data.key}`;
             } catch (err) {
                 statusEl.className = 'admin-status error';
                 statusEl.textContent = '❌ שגיאה בהעלאה: ' + err.message;
                 return;
             }
         } else {
-            // No worker - use data URL
             mediaUrl = URL.createObjectURL(file);
         }
 
