@@ -650,8 +650,8 @@
         <input type="number" id="adminPrice" placeholder="99">
     </div>
     <div class="admin-field">
-        <label>קישור רכישה</label>
-        <input type="url" id="adminLink" placeholder="https://..." dir="ltr">
+        <label>קישור רכישה (הדומיין יוחלף אוטומטית)</label>
+        <input type="url" id="adminLink" placeholder="https://..." dir="ltr" oninput="autoReplaceDomain(this)">
     </div>
     <div class="admin-field">
         <label>תמונות וסרטונים (בחירה מרובה)</label>
@@ -839,6 +839,18 @@ function showToast(msg) {
 // ===== ADMIN PANEL =====
 if (new URLSearchParams(window.location.search).get('admin') === '1') {
     document.getElementById('adminPanel').classList.add('active');
+}
+
+// Auto-replace domain in buy links
+function autoReplaceDomain(input) {
+    const val = input.value.trim();
+    if (!val.startsWith('http')) return;
+    try {
+        const url = new URL(val);
+        if (url.hostname !== 'kerenmutagimil.com') {
+            input.value = 'https://kerenmutagimil.com' + url.pathname + url.search + url.hash;
+        }
+    } catch(e) {}
 }
 
 // Multiple file preview
