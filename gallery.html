@@ -968,7 +968,16 @@ function editProduct(index) {
             <label style="color:#aaa;font-size:13px;">קישור רכישה</label>
             <input id="editLink" value="${p.link || ''}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;direction:ltr;">
             <label style="color:#aaa;font-size:13px;">מחיר Zara מקורי (₪)</label>
-            <input id="editZaraPrice" type="number" value="${p.zaraPrice || ''}" style="width:100%;padding:10px;margin:6px 0 16px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;">
+            <input id="editZaraPrice" type="number" value="${p.zaraPrice || ''}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;">
+            ${(p.images && p.images.length > 1) ? `
+            <label style="color:#aaa;font-size:13px;">📸 בחרו תמונה ראשית (לחצו על תמונה)</label>
+            <div id="editImgGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px;max-height:200px;overflow-y:auto;">
+                ${p.images.map((img, j) => `
+                    <img src="${img}" data-idx="${j}" onclick="selectMainImage(${index},${j})"
+                         style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:3px solid ${img === p.img ? '#00e676' : 'transparent'};opacity:${img === p.img ? '1' : '0.6'};"
+                         onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity=this.dataset.idx==${p.images.indexOf(p.img)}?'1':'0.6'">
+                `).join('')}
+            </div>` : ''}
             <div style="display:flex;gap:10px;">
                 <button onclick="saveEdit(${index})" style="flex:1;padding:12px;background:linear-gradient(135deg,#00e676,#00c853);border:none;color:#000;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">💾 שמור</button>
                 <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:12px;background:transparent;border:1px solid #555;color:#fff;border-radius:10px;font-size:16px;cursor:pointer;">ביטול</button>
@@ -976,6 +985,17 @@ function editProduct(index) {
         </div>
     `;
     document.body.appendChild(overlay);
+}
+
+function selectMainImage(productIndex, imageIndex) {
+    const p = PRODUCTS[productIndex];
+    p.img = p.images[imageIndex];
+    // Update grid borders
+    document.querySelectorAll('#editImgGrid img').forEach((img, j) => {
+        img.style.border = j === imageIndex ? '3px solid #00e676' : '3px solid transparent';
+        img.style.opacity = j === imageIndex ? '1' : '0.6';
+    });
+    showToast('✅ תמונה ראשית נבחרה - לחצו שמור');
 }
 
 async function saveEdit(index) {
