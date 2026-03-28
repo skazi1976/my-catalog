@@ -1032,12 +1032,13 @@ async function adminUploadMultiple() {
                 const resp = await fetch(R2_CONFIG.uploadWorkerUrl, {
                     method: 'POST', body: formData
                 });
-                if (!resp.ok) throw new Error('Upload failed');
                 const data = await resp.json();
+                if (!resp.ok || !data.success) throw new Error(data.error || 'Upload failed: ' + resp.status);
                 mediaUrl = `${R2_CONFIG.bucketUrl}/${data.key}`;
             } catch (err) {
                 statusEl.className = 'admin-status error';
                 statusEl.textContent = '❌ שגיאה בהעלאה: ' + err.message;
+                statusEl.style.display = 'block';
                 return;
             }
         } else {
@@ -1058,10 +1059,15 @@ async function adminUploadMultiple() {
     };
 
     PRODUCTS.push(product);
-    saveProducts();
     renderProducts();
-    statusEl.className = 'admin-status success';
-    statusEl.textContent = `✅ "${title}" נוסף עם ${files.length} תמונות!`;
+    try {
+        await saveProducts();
+        statusEl.className = 'admin-status success';
+        statusEl.textContent = `✅ "${title}" נוסף עם ${files.length} תמונות!`;
+    } catch(e) {
+        statusEl.className = 'admin-status error';
+        statusEl.textContent = '❌ המוצר נוסף אבל שמירה נכשלה: ' + e.message;
+    }
 
     // Clear form
     document.getElementById('adminTitle').value = '';
