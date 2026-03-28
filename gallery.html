@@ -853,13 +853,40 @@ function autoReplaceDomain(input) {
     } catch(e) {}
 }
 
-// Multiple file preview
+// Multiple file preview with main image selection
+let selectedMainIndex = 0;
+
 document.getElementById('adminImage').addEventListener('change', (e) => {
     const grid = document.getElementById('adminPreviewGrid');
     grid.innerHTML = '';
-    Array.from(e.target.files).forEach((file, i) => {
+    selectedMainIndex = 0;
+    const files = Array.from(e.target.files);
+    if (files.length > 1) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'width:100%;color:#ffa500;font-size:13px;margin-bottom:6px;';
+        hint.textContent = '👆 לחצו על תמונה לבחור אותה כראשית';
+        grid.appendChild(hint);
+    }
+    files.forEach((file, i) => {
         const wrap = document.createElement('div');
-        wrap.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid #333;';
+        wrap.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;cursor:pointer;' + (i === 0 ? 'border:3px solid #00e676;box-shadow:0 0 10px rgba(0,230,118,0.5);' : 'border:2px solid #333;');
+        wrap.dataset.index = i;
+        wrap.onclick = function() {
+            selectedMainIndex = i;
+            grid.querySelectorAll('div[data-index]').forEach(d => {
+                d.style.border = '2px solid #333';
+                d.style.boxShadow = 'none';
+                const star = d.querySelector('.main-star');
+                if (star) star.remove();
+            });
+            this.style.border = '3px solid #00e676';
+            this.style.boxShadow = '0 0 10px rgba(0,230,118,0.5)';
+            const star = document.createElement('div');
+            star.className = 'main-star';
+            star.textContent = '⭐ ראשית';
+            star.style.cssText = 'position:absolute;top:2px;right:2px;background:#00e676;color:#000;font-size:9px;padding:1px 4px;border-radius:4px;font-weight:bold;';
+            this.appendChild(star);
+        };
         if (file.type.startsWith('video/')) {
             const vid = document.createElement('video');
             vid.src = URL.createObjectURL(file);
@@ -876,6 +903,13 @@ document.getElementById('adminImage').addEventListener('change', (e) => {
             img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
             wrap.appendChild(img);
         }
+        if (i === 0) {
+            const star = document.createElement('div');
+            star.className = 'main-star';
+            star.textContent = '⭐ ראשית';
+            star.style.cssText = 'position:absolute;top:2px;right:2px;background:#00e676;color:#000;font-size:9px;padding:1px 4px;border-radius:4px;font-weight:bold;';
+            wrap.appendChild(star);
+        }
         const num = document.createElement('div');
         num.textContent = (i+1);
         num.style.cssText = 'position:absolute;bottom:2px;right:4px;color:#fff;font-size:11px;background:rgba(0,0,0,0.6);border-radius:4px;padding:1px 5px;';
@@ -890,7 +924,15 @@ async function adminUploadMultiple() {
     const link = document.getElementById('adminLink').value.trim();
     const fileInput = document.getElementById('adminImage');
     const statusEl = document.getElementById('adminStatus');
-    const files = Array.from(fileInput.files);
+    const allFiles = Array.from(fileInput.files);
+    // Move selected main image to first position
+    const files = [];
+    if (selectedMainIndex > 0 && selectedMainIndex < allFiles.length) {
+        files.push(allFiles[selectedMainIndex]);
+        allFiles.forEach((f, i) => { if (i !== selectedMainIndex) files.push(f); });
+    } else {
+        files.push(...allFiles);
+    }
 
     if (!title || !price || !link) {
         statusEl.className = 'admin-status error';
