@@ -2318,22 +2318,9 @@
             });
         })();
     </script>
-<!--Start of Tawk.to Script-->
+<!-- Seller Contact System -->
 <script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/69c1918cffb4f81c353b4c5a/1jke213lf';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-
-// Hide default Tawk widget - we use custom buttons
-Tawk_API.onLoad = function() {
-    Tawk_API.hideWidget();
-};
+var SELLER_API = 'https://ali-findme-api.ohadf1976.workers.dev';
 
 // Store mapping loaded from stores.json
 var STORE_MAP = {};
@@ -2385,7 +2372,8 @@ function showEmailForm(store, title, productLink, buyLink) {
         '<input id="chatName" type="text" placeholder="השם שלך" style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a3e;color:#fff;font-size:15px;margin-bottom:12px;box-sizing:border-box;direction:rtl;">' +
         '<input id="chatEmail" type="email" placeholder="כתובת אימייל" style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a3e;color:#fff;font-size:15px;margin-bottom:12px;box-sizing:border-box;direction:ltr;">' +
         '<p id="chatEmailError" style="color:#ff6b6b;font-size:13px;margin:0 0 12px;display:none;">אנא הזינו כתובת אימייל תקינה</p>' +
-        '<button id="chatStartBtn" style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#00c853,#009624);color:#fff;font-size:16px;font-weight:bold;cursor:pointer;">התחילו צ\'אט</button>' +
+        '<textarea id="chatMessage" placeholder="כתבו את ההודעה שלכם..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a3e;color:#fff;font-size:15px;margin-bottom:12px;box-sizing:border-box;direction:rtl;min-height:80px;resize:vertical;"></textarea>' +
+        '<button id="chatStartBtn" style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#00c853,#009624);color:#fff;font-size:16px;font-weight:bold;cursor:pointer;">📤 שליחה</button>' +
         '<button id="chatCancelBtn" style="width:100%;padding:10px;border-radius:10px;border:none;background:transparent;color:#888;font-size:14px;cursor:pointer;margin-top:8px;">ביטול</button>' +
         '</div>';
     document.body.appendChild(overlay);
@@ -2396,23 +2384,40 @@ function showEmailForm(store, title, productLink, buyLink) {
     document.getElementById('chatStartBtn').addEventListener('click', function() {
         var name = document.getElementById('chatName').value.trim();
         var email = document.getElementById('chatEmail').value.trim();
+        var message = document.getElementById('chatMessage').value.trim();
         var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email || !emailRegex.test(email)) {
             document.getElementById('chatEmailError').style.display = 'block';
             return;
         }
-        overlay.remove();
-        Tawk_API.setAttributes({
-            'name': name || 'מבקר',
-            'email': email,
-            'department': store,
-            'product': title.substring(0, 50),
-            'buylink': buyLink || productLink
-        }, function(error) {});
-        Tawk_API.addTags([title.substring(0, 30)], function(error) {});
-        Tawk_API.showWidget();
-        Tawk_API.maximize();
-        Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n\n🛒 קישור לרכישה:\n' + (buyLink || productLink) + '\n\n🔗 קישור למוצר בקטלוג:\n' + productLink);
+        if (!message) { message = 'מתעניין/ת במוצר: ' + title; }
+        var btn = document.getElementById('chatStartBtn');
+        btn.textContent = '⏳ שולח...';
+        btn.disabled = true;
+        fetch(SELLER_API + '/seller/message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                store: store,
+                customerName: name || 'מבקר',
+                customerEmail: email,
+                message: message,
+                product: title.substring(0, 60),
+                productLink: productLink,
+                buyLink: buyLink || productLink
+            })
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            overlay.innerHTML = '<div style="background:#1a1a2e;border-radius:16px;padding:40px;max-width:380px;width:90%;text-align:center;">' +
+                '<div style="font-size:50px;margin-bottom:15px;">✅</div>' +
+                '<h3 style="color:#fff;margin:0 0 10px;">ההודעה נשלחה בהצלחה!</h3>' +
+                '<p style="color:#aaa;font-size:14px;">המוכר יחזור אליכם בהקדם למייל</p>' +
+                '<button onclick="this.closest(\'#chatEmailOverlay\').remove()" style="margin-top:20px;padding:12px 30px;border-radius:10px;border:none;background:#00c853;color:#fff;font-size:15px;cursor:pointer;">סגירה</button>' +
+                '</div>';
+        }).catch(function(err) {
+            btn.textContent = '📤 שליחה';
+            btn.disabled = false;
+            alert('שגיאה בשליחה, נסו שוב');
+        });
     });
 
     document.getElementById('chatEmail').addEventListener('keypress', function(ev) {
@@ -2454,6 +2459,6 @@ var grid = document.querySelector('.grid');
 if (grid) chatObserver.observe(grid, { childList: true, subtree: true });
 setTimeout(addChatButtons, 3000);
 </script>
-<!--End of Tawk.to Script-->
+<!-- End Seller Contact System -->
 </body>
 </html>
