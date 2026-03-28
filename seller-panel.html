@@ -957,31 +957,61 @@ const MOCK_PRODUCTS = [
 ];
 
 // ==================== LOGIN ====================
-function doLogin() {
+async function doLogin() {
     const store = document.getElementById('loginStore').value.trim();
     const pass = document.getElementById('loginPass').value;
-    if (!store) { alert('הזינו שם חנות'); return; }
-    // For demo - any store/pass works
-    localStorage.setItem('sellerStore', store);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').classList.add('active');
-    document.getElementById('storeNameDisplay').textContent = store;
-    document.getElementById('settStoreName').value = store;
-    initDashboard();
+    if (!store || !pass) { alert(currentLang === 'he' ? 'הזינו שם חנות וסיסמה' : 'Enter store name and password'); return; }
+
+    const btn = document.querySelector('.login-box button');
+    btn.disabled = true;
+    btn.textContent = '⏳...';
+
+    try {
+        const resp = await fetch('https://ali-findme-api.ohadf1976.workers.dev/seller/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ store, password: pass })
+        });
+        const result = await resp.json();
+
+        if (result.success) {
+            localStorage.setItem('sellerStore', store);
+            localStorage.setItem('sellerToken', result.token);
+            localStorage.setItem('sellerName', result.name || store);
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('storeNameDisplay').textContent = store;
+            document.getElementById('settStoreName').value = store;
+            initDashboard();
+        } else {
+            alert(currentLang === 'he' ? 'שם חנות או סיסמה שגויים' : result.error || 'Login failed');
+        }
+    } catch (e) {
+        alert('Connection error: ' + e.message);
+    }
+
+    btn.disabled = false;
+    btn.textContent = TRANSLATIONS[currentLang].loginBtn;
 }
 
 function doLogout() {
     localStorage.removeItem('sellerStore');
+    localStorage.removeItem('sellerToken');
+    localStorage.removeItem('sellerName');
     document.getElementById('dashboard').classList.remove('active');
     document.getElementById('loginScreen').style.display = 'flex';
 }
 
-// Auto-login
+// Auto-login (only if token exists)
 (function() {
     const saved = localStorage.getItem('sellerStore');
-    if (saved) {
-        document.getElementById('loginStore').value = saved;
-        doLogin();
+    const token = localStorage.getItem('sellerToken');
+    if (saved && token) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboard').classList.add('active');
+        document.getElementById('storeNameDisplay').textContent = saved;
+        document.getElementById('settStoreName').value = saved;
+        setTimeout(() => initDashboard(), 100);
     }
 })();
 
