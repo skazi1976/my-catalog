@@ -2397,7 +2397,7 @@ document.addEventListener('click', function(e) {
     Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
 });
 
-// Open chat from lightbox
+// Open chat from lightbox - with email collection
 function openSellerChat() {
     var chatBtn = document.getElementById('lbChatBtn');
     var store = chatBtn.dataset.store || 'xuxuxuxux';
@@ -2405,14 +2405,60 @@ function openSellerChat() {
     var productLink = window.location.href;
     var buyLink = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].l : '';
 
-    Tawk_API.setAttributes({
-        'department': store,
-        'product': title.substring(0, 50)
-    }, function(error) {});
+    // Show email form overlay
+    var existing = document.getElementById('chatEmailOverlay');
+    if (existing) existing.remove();
 
-    Tawk_API.showWidget();
-    Tawk_API.maximize();
-    Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
+    var overlay = document.createElement('div');
+    overlay.id = 'chatEmailOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:100000;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#1a1a2e;border-radius:16px;padding:30px;max-width:380px;width:90%;direction:rtl;text-align:right;">' +
+        '<h3 style="color:#fff;margin:0 0 8px;font-size:20px;">💬 צור קשר עם המוכר</h3>' +
+        '<p style="color:#aaa;margin:0 0 20px;font-size:14px;">השאירו פרטים ונחזור אליכם בהקדם</p>' +
+        '<input id="chatName" type="text" placeholder="השם שלך" style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a3e;color:#fff;font-size:15px;margin-bottom:12px;box-sizing:border-box;direction:rtl;">' +
+        '<input id="chatEmail" type="email" placeholder="כתובת אימייל" style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#2a2a3e;color:#fff;font-size:15px;margin-bottom:12px;box-sizing:border-box;direction:ltr;">' +
+        '<p id="chatEmailError" style="color:#ff6b6b;font-size:13px;margin:0 0 12px;display:none;">אנא הזינו כתובת אימייל תקינה</p>' +
+        '<button id="chatStartBtn" style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#00c853,#009624);color:#fff;font-size:16px;font-weight:bold;cursor:pointer;">התחילו צ\'אט</button>' +
+        '<button id="chatCancelBtn" style="width:100%;padding:10px;border-radius:10px;border:none;background:transparent;color:#888;font-size:14px;cursor:pointer;margin-top:8px;">ביטול</button>' +
+        '</div>';
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    document.getElementById('chatCancelBtn').addEventListener('click', function() { overlay.remove(); });
+
+    // Start chat on submit
+    document.getElementById('chatStartBtn').addEventListener('click', function() {
+        var name = document.getElementById('chatName').value.trim();
+        var email = document.getElementById('chatEmail').value.trim();
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email || !emailRegex.test(email)) {
+            document.getElementById('chatEmailError').style.display = 'block';
+            return;
+        }
+
+        overlay.remove();
+
+        Tawk_API.setAttributes({
+            'name': name || 'מבקר',
+            'email': email,
+            'department': store,
+            'product': title.substring(0, 50)
+        }, function(error) {});
+
+        Tawk_API.showWidget();
+        Tawk_API.maximize();
+        Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
+    });
+
+    // Enter key submits
+    document.getElementById('chatEmail').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') document.getElementById('chatStartBtn').click();
+    });
+
+    // Focus name input
+    setTimeout(function() { document.getElementById('chatName').focus(); }, 100);
 }
 
 // Inject buttons after products load
