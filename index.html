@@ -2406,11 +2406,13 @@ function showEmailForm(store, title, productLink, buyLink) {
             'name': name || 'מבקר',
             'email': email,
             'department': store,
-            'product': title.substring(0, 50)
+            'product': title.substring(0, 50),
+            'buylink': buyLink || productLink
         }, function(error) {});
+        Tawk_API.addTags([title.substring(0, 30)], function(error) {});
         Tawk_API.showWidget();
         Tawk_API.maximize();
-        Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
+        Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n\n🛒 קישור לרכישה:\n' + (buyLink || productLink) + '\n\n🔗 קישור למוצר בקטלוג:\n' + productLink);
     });
 
     document.getElementById('chatEmail').addEventListener('keypress', function(ev) {
