@@ -2394,7 +2394,7 @@ function showEmailForm(store, title, productLink, buyLink) {
         var btn = document.getElementById('chatStartBtn');
         btn.textContent = '⏳ שולח...';
         btn.disabled = true;
-        fetch(SELLER_API + '/seller/message', {
+        fetch(SELLER_API + '/seller/customer-msg', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
