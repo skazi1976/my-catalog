@@ -895,7 +895,7 @@ function showLbImage() {
 
     const counter = currentLbImages.length > 1 ? ` (${currentLbImage + 1}/${currentLbImages.length})` : '';
     document.getElementById('lightboxTitle').textContent = p.title + counter;
-    document.getElementById('lightboxWAShare').href = 'https://wa.me/?text=' + encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + i);
+    document.getElementById('lightboxWAShare').href = 'https://wa.me/?text=' + encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + currentLightbox);
 }
 
 function closeLightbox() {
