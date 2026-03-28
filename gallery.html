@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HaCatalog - גלריית מוצרים</title>
+    <meta name="description" content="גלריית מוצרים חדשה - מותגים נחשבים במחירי רצפה עם משלוח ישיר">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== PRODUCTS DATA - EDIT HERE ===== */
+        /* Products are defined in the script below */
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: rgba(255,255,255,0.04);
+            --surface-hover: rgba(255,255,255,0.08);
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --text: #ffffff;
+            --text-dim: rgba(255,255,255,0.5);
+            --text-muted: rgba(255,255,255,0.3);
+            --accent-green: #00e676;
+            --accent-orange: #FF6B00;
+            --accent-orange-light: #FF8C40;
+            --price-green: #25D366;
+            --whatsapp: #25D366;
+            --whatsapp-dark: #128C7E;
+            --telegram: #0088cc;
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Heebo', sans-serif;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1025 50%, #0f0f1a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Heebo', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-green), #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-light));
+            color: #fff;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            animation: pulse-badge 2s infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,0,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(255,107,0,0); }
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            padding: 40px 20px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,107,0,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            animation: glow 15s infinite;
+        }
+        @keyframes glow {
+            0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+        }
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            color: var(--text-dim);
+            font-size: 16px;
+            position: relative;
+        }
+        .product-count {
+            display: inline-block;
+            margin-top: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+            position: relative;
+        }
+        .product-count strong {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        /* ===== PRODUCT GRID ===== */
+        .grid-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 100px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        .empty-state p {
+            font-size: 18px;
+        }
+
+        /* ===== PRODUCT CARD ===== */
+        .product-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .product-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            border-color: var(--border-hover);
+        }
+        .card-image-wrap {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            overflow: hidden;
+            cursor: pointer;
+            background: #111118;
+        }
+        .card-image-wrap img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .product-card:hover .card-image-wrap img {
+            transform: scale(1.05);
+        }
+        .card-zoom-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .product-card:hover .card-zoom-icon {
+            opacity: 1;
+        }
+        .card-info {
+            padding: 14px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+        .card-title {
+            font-family: 'Heebo', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-price {
+            font-family: 'Heebo', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--price-green);
+            direction: ltr;
+            text-align: right;
+        }
+        .card-price span {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .buy-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-light));
+            color: #fff;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: auto;
+        }
+        .buy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,107,0,0.3);
+        }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .lightbox-overlay.active {
+            display: flex;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .lightbox-img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: scaleIn 0.3s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .lightbox-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .lightbox-nav:hover { background: rgba(255,255,255,0.2); }
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
+        .lightbox-title {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 14px;
+            color: #fff;
+            white-space: nowrap;
+            max-width: 90vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== SHARE SECTION ===== */
+        .share-section {
+            max-width: 1200px;
+            margin: 0 auto 120px;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .share-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-dim);
+        }
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            color: #fff;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .share-btn:hover {
+            transform: scale(1.05);
+        }
+        .share-btn.whatsapp {
+            background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+        }
+        .share-btn.whatsapp:hover { box-shadow: 0 6px 20px rgba(37,211,102,0.3); }
+        .share-btn.telegram {
+            background: linear-gradient(135deg, #0088cc, #006fa8);
+        }
+        .share-btn.telegram:hover { box-shadow: 0 6px 20px rgba(0,136,204,0.3); }
+        .share-btn.copy-link {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        .share-btn.copy-link:hover { box-shadow: 0 6px 20px rgba(255,255,255,0.05); }
+
+        /* ===== STICKY WHATSAPP ===== */
+        .sticky-wa {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+            color: #fff;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 6px 25px rgba(37,211,102,0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .sticky-wa:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 8px 30px rgba(37,211,102,0.5);
+        }
+        .sticky-wa svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--accent-green);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 300;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-panel {
+            display: none;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            padding: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        .admin-panel.active { display: block; }
+        .admin-panel h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--accent-orange);
+        }
+        .admin-field {
+            margin-bottom: 16px;
+        }
+        .admin-field label {
+            display: block;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--text-dim);
+        }
+        .admin-field input,
+        .admin-field textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Assistant', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .admin-field input:focus,
+        .admin-field textarea:focus {
+            border-color: var(--accent-orange);
+        }
+        .admin-field input[type="file"] {
+            padding: 8px;
+        }
+        .admin-preview {
+            margin-top: 10px;
+            max-width: 200px;
+            border-radius: var(--radius-sm);
+            display: none;
+        }
+        .admin-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .admin-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .admin-btn:hover { transform: scale(1.03); }
+        .admin-btn.primary {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-light));
+            color: #fff;
+        }
+        .admin-btn.primary:hover { box-shadow: 0 4px 15px rgba(255,107,0,0.3); }
+        .admin-btn.secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .admin-status {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            display: none;
+        }
+        .admin-status.success { display: block; background: rgba(0,230,118,0.1); color: var(--accent-green); border: 1px solid rgba(0,230,118,0.2); }
+        .admin-status.error { display: block; background: rgba(255,71,87,0.1); color: #ff4757; border: 1px solid rgba(255,71,87,0.2); }
+        .admin-json-output {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--accent-green);
+            white-space: pre-wrap;
+            word-break: break-all;
+            direction: ltr;
+            text-align: left;
+            display: none;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .hero h1 { font-size: 26px; }
+            .hero p { font-size: 14px; }
+            .header-inner { padding: 0 14px; }
+            .logo { font-size: 22px; }
+            .header-badge { font-size: 12px; padding: 6px 12px; }
+            .card-info { padding: 10px 12px 12px; }
+            .card-title { font-size: 13px; }
+            .card-price { font-size: 18px; }
+            .buy-btn { font-size: 13px; padding: 8px 14px; }
+            .grid-container { padding: 0 10px 100px; }
+            .lightbox-nav { width: 40px; height: 40px; font-size: 20px; }
+            .lightbox-prev { left: 10px; }
+            .lightbox-next { right: 10px; }
+        }
+
+        @media (max-width: 360px) {
+            .product-grid { gap: 8px; }
+            .card-title { font-size: 12px; }
+            .card-price { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">HaCatalog</div>
+        <div class="header-badge">🔥 גלריה חדשה</div>
+    </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <h1>🛍️ <span>הגלריה</span> החדשה שלנו</h1>
+    <p>מוצרים נבחרים במחירי רצפה - ישירות אליכם</p>
+    <div class="product-count" id="productCount"></div>
+</section>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div class="admin-panel" id="adminPanel">
+    <h2>🔧 ניהול מוצרים</h2>
+    <div class="admin-field">
+        <label>שם המוצר</label>
+        <input type="text" id="adminTitle" placeholder="למשל: נעלי נייקי אייר מקס">
+    </div>
+    <div class="admin-field">
+        <label>מחיר (₪)</label>
+        <input type="number" id="adminPrice" placeholder="99">
+    </div>
+    <div class="admin-field">
+        <label>קישור רכישה</label>
+        <input type="url" id="adminLink" placeholder="https://..." dir="ltr">
+    </div>
+    <div class="admin-field">
+        <label>תמונת מוצר</label>
+        <input type="file" id="adminImage" accept="image/*">
+        <img class="admin-preview" id="adminPreview" alt="תצוגה מקדימה">
+    </div>
+    <div class="admin-actions">
+        <button class="admin-btn primary" onclick="adminUpload()">📤 העלה מוצר</button>
+        <button class="admin-btn secondary" onclick="adminExportJSON()">📋 ייצא JSON</button>
+    </div>
+    <div class="admin-status" id="adminStatus"></div>
+    <div class="admin-json-output" id="adminJSON"></div>
+</div>
+
+<!-- ===== PRODUCT GRID ===== -->
+<div class="grid-container">
+    <div class="product-grid" id="productGrid"></div>
+</div>
+
+<!-- ===== SHARE SECTION ===== -->
+<section class="share-section" id="shareSection">
+    <h3>📢 שתפו את הגלריה עם חברים</h3>
+    <div class="share-buttons">
+        <a class="share-btn whatsapp" id="shareWA" href="#" target="_blank">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            שתפו בוואטסאפ
+        </a>
+        <a class="share-btn telegram" id="shareTG" href="#" target="_blank">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            שתפו בטלגרם
+        </a>
+        <button class="share-btn copy-link" onclick="copyLink()">
+            🔗 העתק קישור
+        </button>
+    </div>
+</section>
+
+<!-- ===== STICKY WHATSAPP ===== -->
+<a class="sticky-wa" id="stickyWA" href="#" target="_blank">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    שתפו בוואטסאפ
+</a>
+
+<!-- ===== LIGHTBOX ===== -->
+<div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1)">&#8250;</button>
+    <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)">&#8249;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <div class="lightbox-title" id="lightboxTitle"></div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================
+   PRODUCTS DATA - ADD YOUR PRODUCTS HERE
+   Each product: { img: "URL", title: "שם", price: 99, link: "URL" }
+   ========================================================== */
+const PRODUCTS = [];
+
+/* ========================================================== */
+
+// Cloudflare R2 config (for admin upload)
+const R2_CONFIG = {
+    accountId: '84c63f0f65cabb8e5b611913c03a1188',
+    bucketUrl: 'https://pub-0ad199860b5a4ce0b3fb483660b8a4ca.r2.dev',
+    uploadWorkerUrl: '' // Set your R2 upload worker URL here
+};
+
+const pageUrl = window.location.href;
+const shareText = encodeURIComponent('🛍️ גלריית מוצרים חדשה - מחירי רצפה!\n' + pageUrl);
+
+// Share links
+document.getElementById('shareWA').href = `https://wa.me/?text=${shareText}`;
+document.getElementById('stickyWA').href = `https://wa.me/?text=${shareText}`;
+document.getElementById('shareTG').href = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent('🛍️ גלריית מוצרים חדשה - מחירי רצפה!')}`;
+
+// Render products
+function renderProducts() {
+    const grid = document.getElementById('productGrid');
+    const countEl = document.getElementById('productCount');
+    const shareEl = document.getElementById('shareSection');
+
+    if (PRODUCTS.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>בקרוב יתווספו מוצרים חדשים!</p></div>';
+        countEl.style.display = 'none';
+        shareEl.style.display = 'none';
+        return;
+    }
+
+    countEl.innerHTML = `<strong>${PRODUCTS.length}</strong> מוצרים בגלריה`;
+    countEl.style.display = 'inline-block';
+    shareEl.style.display = 'block';
+
+    grid.innerHTML = PRODUCTS.map((p, i) => `
+        <div class="product-card" data-index="${i}">
+            <div class="card-image-wrap" onclick="openLightbox(${i})">
+                <img src="${p.img}" alt="${p.title}" loading="lazy">
+                <div class="card-zoom-icon">🔍</div>
+            </div>
+            <div class="card-info">
+                <div class="card-title">${p.title}</div>
+                <div class="card-price">₪${p.price} <span>כולל משלוח</span></div>
+                <a href="${p.link}" target="_blank" rel="noopener" class="buy-btn">🛒 לרכישה</a>
+            </div>
+        </div>
+    `).join('');
+
+    observeCards();
+}
+
+// Scroll animations
+function observeCards() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('visible');
+                }, i * 60);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
+}
+
+// Lightbox
+let currentLightbox = 0;
+
+function openLightbox(index) {
+    currentLightbox = index;
+    const p = PRODUCTS[index];
+    document.getElementById('lightboxImg').src = p.img;
+    document.getElementById('lightboxImg').alt = p.title;
+    document.getElementById('lightboxTitle').textContent = p.title;
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function navLightbox(dir) {
+    // RTL: arrows are visually flipped
+    currentLightbox = (currentLightbox - dir + PRODUCTS.length) % PRODUCTS.length;
+    const p = PRODUCTS[currentLightbox];
+    document.getElementById('lightboxImg').src = p.img;
+    document.getElementById('lightboxImg').alt = p.title;
+    document.getElementById('lightboxTitle').textContent = p.title;
+}
+
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeLightbox();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('lightbox').classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') navLightbox(-1); // RTL
+    if (e.key === 'ArrowLeft') navLightbox(1);
+});
+
+// Copy link
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('✅ הקישור הועתק!');
+    });
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== ADMIN PANEL =====
+if (new URLSearchParams(window.location.search).get('admin') === '1') {
+    document.getElementById('adminPanel').classList.add('active');
+}
+
+// Image preview
+document.getElementById('adminImage').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const preview = document.getElementById('adminPreview');
+        preview.src = ev.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
+async function adminUpload() {
+    const title = document.getElementById('adminTitle').value.trim();
+    const price = document.getElementById('adminPrice').value.trim();
+    const link = document.getElementById('adminLink').value.trim();
+    const fileInput = document.getElementById('adminImage');
+    const statusEl = document.getElementById('adminStatus');
+
+    if (!title || !price || !link) {
+        statusEl.className = 'admin-status error';
+        statusEl.textContent = '❌ יש למלא את כל השדות';
+        return;
+    }
+
+    let imgUrl = '';
+
+    if (fileInput.files[0] && R2_CONFIG.uploadWorkerUrl) {
+        // Upload to R2 via worker
+        statusEl.className = 'admin-status';
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(255,255,255,0.05)';
+        statusEl.style.color = 'var(--text-dim)';
+        statusEl.style.border = '1px solid var(--border)';
+        statusEl.textContent = '⏳ מעלה תמונה...';
+
+        try {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('folder', 'gallery');
+
+            const resp = await fetch(R2_CONFIG.uploadWorkerUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!resp.ok) throw new Error('Upload failed');
+            const data = await resp.json();
+            imgUrl = data.url || `${R2_CONFIG.bucketUrl}/${data.key}`;
+        } catch (err) {
+            statusEl.className = 'admin-status error';
+            statusEl.textContent = '❌ שגיאה בהעלאת תמונה: ' + err.message;
+            return;
+        }
+    } else if (fileInput.files[0]) {
+        // No worker configured - use data URL as fallback preview
+        imgUrl = document.getElementById('adminPreview').src;
+        statusEl.className = 'admin-status';
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(255,165,0,0.1)';
+        statusEl.style.color = '#ffa500';
+        statusEl.style.border = '1px solid rgba(255,165,0,0.2)';
+        statusEl.textContent = '⚠️ R2 Worker לא מוגדר - התמונה נוספה כ-preview בלבד. הגדירו uploadWorkerUrl בקוד.';
+    }
+
+    const product = {
+        img: imgUrl,
+        title: title,
+        price: Number(price),
+        link: link
+    };
+
+    PRODUCTS.push(product);
+    renderProducts();
+
+    // Show success
+    if (!statusEl.textContent.startsWith('⚠️')) {
+        statusEl.className = 'admin-status success';
+        statusEl.textContent = `✅ המוצר "${title}" נוסף בהצלחה!`;
+    }
+
+    // Clear form
+    document.getElementById('adminTitle').value = '';
+    document.getElementById('adminPrice').value = '';
+    document.getElementById('adminLink').value = '';
+    fileInput.value = '';
+    document.getElementById('adminPreview').style.display = 'none';
+}
+
+function adminExportJSON() {
+    const jsonEl = document.getElementById('adminJSON');
+    if (PRODUCTS.length === 0) {
+        jsonEl.style.display = 'block';
+        jsonEl.textContent = '// אין מוצרים. הוסיפו מוצרים ולחצו שוב.\nconst PRODUCTS = [];';
+        return;
+    }
+    const json = JSON.stringify(PRODUCTS, null, 2);
+    jsonEl.style.display = 'block';
+    jsonEl.textContent = `const PRODUCTS = ${json};`;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(`const PRODUCTS = ${json};`).then(() => {
+        showToast('✅ JSON הועתק ללוח!');
+    });
+}
+
+// Init
+renderProducts();
+</script>
+</body>
+</html>
