@@ -2371,41 +2371,8 @@ function addChatButtons() {
     });
 }
 
-// Open chat with correct department
-document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.chat-seller-btn');
-    if (!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    var store = btn.dataset.store;
-    var card = btn.closest('.product-card');
-    var title = card ? (card.querySelector('.card-title') || {}).textContent || '' : '';
-    var cardIdx = card ? parseInt(card.dataset.idx) : -1;
-    var buyLink = (cardIdx >= 0 && PRODUCTS[cardIdx]) ? PRODUCTS[cardIdx].l : '';
-    var productLink = cardIdx >= 0 ? 'https://hacatalog.com/#product=' + getProductId(PRODUCTS[cardIdx], cardIdx) : window.location.href;
-
-    Tawk_API.setAttributes({
-        'department': store,
-        'product': title.substring(0, 50)
-    }, function(error) {});
-
-    Tawk_API.showWidget();
-    Tawk_API.maximize();
-
-    // Send automatic first message with product links
-    Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
-});
-
-// Open chat from lightbox - with email collection
-function openSellerChat() {
-    var chatBtn = document.getElementById('lbChatBtn');
-    var store = chatBtn.dataset.store || 'xuxuxuxux';
-    var title = chatBtn.dataset.title || '';
-    var productLink = window.location.href;
-    var buyLink = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].l : '';
-
-    // Show email form overlay
+// Shared email form function
+function showEmailForm(store, title, productLink, buyLink) {
     var existing = document.getElementById('chatEmailOverlay');
     if (existing) existing.remove();
 
@@ -2423,42 +2390,60 @@ function openSellerChat() {
         '</div>';
     document.body.appendChild(overlay);
 
-    // Close on overlay click
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    overlay.addEventListener('click', function(ev) { if (ev.target === overlay) overlay.remove(); });
     document.getElementById('chatCancelBtn').addEventListener('click', function() { overlay.remove(); });
 
-    // Start chat on submit
     document.getElementById('chatStartBtn').addEventListener('click', function() {
         var name = document.getElementById('chatName').value.trim();
         var email = document.getElementById('chatEmail').value.trim();
         var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
         if (!email || !emailRegex.test(email)) {
             document.getElementById('chatEmailError').style.display = 'block';
             return;
         }
-
         overlay.remove();
-
         Tawk_API.setAttributes({
             'name': name || 'מבקר',
             'email': email,
             'department': store,
             'product': title.substring(0, 50)
         }, function(error) {});
-
         Tawk_API.showWidget();
         Tawk_API.maximize();
-        Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
+        Tawk_API.sendMessage('היי, מתעניין/ת במוצר: ' + title.substring(0, 60) + '\n🔗 קישור למוצר: ' + productLink + (buyLink ? '\n🛒 קישור לרכישה: ' + buyLink : ''));
     });
 
-    // Enter key submits
-    document.getElementById('chatEmail').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') document.getElementById('chatStartBtn').click();
+    document.getElementById('chatEmail').addEventListener('keypress', function(ev) {
+        if (ev.key === 'Enter') document.getElementById('chatStartBtn').click();
     });
-
-    // Focus name input
     setTimeout(function() { document.getElementById('chatName').focus(); }, 100);
+}
+
+// Open chat with correct department (grid buttons)
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.chat-seller-btn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    var store = btn.dataset.store;
+    var card = btn.closest('.product-card');
+    var title = card ? (card.querySelector('.card-title') || {}).textContent || '' : '';
+    var cardIdx = card ? parseInt(card.dataset.idx) : -1;
+    var buyLink = (cardIdx >= 0 && PRODUCTS[cardIdx]) ? PRODUCTS[cardIdx].l : '';
+    var productLink = cardIdx >= 0 ? 'https://hacatalog.com/#product=' + getProductId(PRODUCTS[cardIdx], cardIdx) : window.location.href;
+
+    showEmailForm(store, title, productLink, buyLink);
+});
+
+// Open chat from lightbox - uses shared email form
+function openSellerChat() {
+    var chatBtn = document.getElementById('lbChatBtn');
+    var store = chatBtn.dataset.store || 'xuxuxuxux';
+    var title = chatBtn.dataset.title || '';
+    var productLink = window.location.href;
+    var buyLink = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].l : '';
+    showEmailForm(store, title, productLink, buyLink);
 }
 
 // Inject buttons after products load
