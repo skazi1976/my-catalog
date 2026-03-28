@@ -654,12 +654,12 @@
         <input type="url" id="adminLink" placeholder="https://..." dir="ltr">
     </div>
     <div class="admin-field">
-        <label>תמונת מוצר</label>
-        <input type="file" id="adminImage" accept="image/*">
-        <img class="admin-preview" id="adminPreview" alt="תצוגה מקדימה">
+        <label>תמונות וסרטונים (בחירה מרובה)</label>
+        <input type="file" id="adminImage" accept="image/*,video/*" multiple>
+        <div id="adminPreviewGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
     </div>
     <div class="admin-actions">
-        <button class="admin-btn primary" onclick="adminUpload()">📤 העלה מוצר</button>
+        <button class="admin-btn primary" onclick="adminUploadMultiple()">📤 העלה מוצרים</button>
         <button class="admin-btn secondary" onclick="adminExportJSON()">📋 ייצא JSON</button>
     </div>
     <div class="admin-status" id="adminStatus"></div>
@@ -751,7 +751,10 @@ function renderProducts() {
     grid.innerHTML = PRODUCTS.map((p, i) => `
         <div class="product-card" data-index="${i}">
             <div class="card-image-wrap" onclick="openLightbox(${i})">
-                <img src="${p.img}" alt="${p.title}" loading="lazy">
+                ${p.isVideo ?
+                    `<video src="${p.img}" muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video><div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;">🎬 סרטון</div>` :
+                    `<img src="${p.img}" alt="${p.title}" loading="lazy">`
+                }
                 <div class="card-zoom-icon">🔍</div>
             </div>
             <div class="card-info">
@@ -838,94 +841,115 @@ if (new URLSearchParams(window.location.search).get('admin') === '1') {
     document.getElementById('adminPanel').classList.add('active');
 }
 
-// Image preview
+// Multiple file preview
 document.getElementById('adminImage').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        const preview = document.getElementById('adminPreview');
-        preview.src = ev.target.result;
-        preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    const grid = document.getElementById('adminPreviewGrid');
+    grid.innerHTML = '';
+    Array.from(e.target.files).forEach((file, i) => {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid #333;';
+        if (file.type.startsWith('video/')) {
+            const vid = document.createElement('video');
+            vid.src = URL.createObjectURL(file);
+            vid.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+            vid.muted = true;
+            const badge = document.createElement('div');
+            badge.textContent = '🎬';
+            badge.style.cssText = 'position:absolute;top:2px;left:2px;font-size:16px;';
+            wrap.appendChild(vid);
+            wrap.appendChild(badge);
+        } else {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+            wrap.appendChild(img);
+        }
+        const num = document.createElement('div');
+        num.textContent = (i+1);
+        num.style.cssText = 'position:absolute;bottom:2px;right:4px;color:#fff;font-size:11px;background:rgba(0,0,0,0.6);border-radius:4px;padding:1px 5px;';
+        wrap.appendChild(num);
+        grid.appendChild(wrap);
+    });
 });
 
-async function adminUpload() {
+async function adminUploadMultiple() {
     const title = document.getElementById('adminTitle').value.trim();
     const price = document.getElementById('adminPrice').value.trim();
     const link = document.getElementById('adminLink').value.trim();
     const fileInput = document.getElementById('adminImage');
     const statusEl = document.getElementById('adminStatus');
+    const files = Array.from(fileInput.files);
 
     if (!title || !price || !link) {
         statusEl.className = 'admin-status error';
-        statusEl.textContent = '❌ יש למלא את כל השדות';
+        statusEl.textContent = '❌ יש למלא שם, מחיר וקישור';
+        statusEl.style.display = 'block';
         return;
     }
 
-    let imgUrl = '';
-
-    if (fileInput.files[0] && R2_CONFIG.uploadWorkerUrl) {
-        // Upload to R2 via worker
-        statusEl.className = 'admin-status';
+    if (files.length === 0) {
+        statusEl.className = 'admin-status error';
+        statusEl.textContent = '❌ יש לבחור תמונות או סרטונים';
         statusEl.style.display = 'block';
-        statusEl.style.background = 'rgba(255,255,255,0.05)';
-        statusEl.style.color = 'var(--text-dim)';
-        statusEl.style.border = '1px solid var(--border)';
-        statusEl.textContent = '⏳ מעלה תמונה...';
+        return;
+    }
 
-        try {
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('folder', 'gallery');
+    statusEl.className = 'admin-status';
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'rgba(255,255,255,0.05)';
+    statusEl.style.color = 'var(--text-dim)';
+    statusEl.style.border = '1px solid var(--border)';
 
-            const resp = await fetch(R2_CONFIG.uploadWorkerUrl, {
-                method: 'POST',
-                body: formData
-            });
+    let uploaded = 0;
 
-            if (!resp.ok) throw new Error('Upload failed');
-            const data = await resp.json();
-            imgUrl = data.url || `${R2_CONFIG.bucketUrl}/${data.key}`;
-        } catch (err) {
-            statusEl.className = 'admin-status error';
-            statusEl.textContent = '❌ שגיאה בהעלאת תמונה: ' + err.message;
-            return;
+    for (const file of files) {
+        uploaded++;
+        statusEl.textContent = `⏳ מעלה ${uploaded}/${files.length}...`;
+        let mediaUrl = '';
+        const isVideo = file.type.startsWith('video/');
+
+        if (R2_CONFIG.uploadWorkerUrl) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'gallery');
+                const resp = await fetch(R2_CONFIG.uploadWorkerUrl, {
+                    method: 'POST', body: formData
+                });
+                if (!resp.ok) throw new Error('Upload failed');
+                const data = await resp.json();
+                mediaUrl = data.url || `${R2_CONFIG.bucketUrl}/${data.key}`;
+            } catch (err) {
+                statusEl.className = 'admin-status error';
+                statusEl.textContent = '❌ שגיאה בהעלאה: ' + err.message;
+                return;
+            }
+        } else {
+            // No worker - use data URL
+            mediaUrl = URL.createObjectURL(file);
         }
-    } else if (fileInput.files[0]) {
-        // No worker configured - use data URL as fallback preview
-        imgUrl = document.getElementById('adminPreview').src;
-        statusEl.className = 'admin-status';
-        statusEl.style.display = 'block';
-        statusEl.style.background = 'rgba(255,165,0,0.1)';
-        statusEl.style.color = '#ffa500';
-        statusEl.style.border = '1px solid rgba(255,165,0,0.2)';
-        statusEl.textContent = '⚠️ R2 Worker לא מוגדר - התמונה נוספה כ-preview בלבד. הגדירו uploadWorkerUrl בקוד.';
+
+        const product = {
+            img: mediaUrl,
+            title: files.length > 1 ? `${title} (${uploaded})` : title,
+            price: Number(price),
+            link: link,
+            isVideo: isVideo
+        };
+
+        PRODUCTS.push(product);
     }
 
-    const product = {
-        img: imgUrl,
-        title: title,
-        price: Number(price),
-        link: link
-    };
-
-    PRODUCTS.push(product);
     renderProducts();
-
-    // Show success
-    if (!statusEl.textContent.startsWith('⚠️')) {
-        statusEl.className = 'admin-status success';
-        statusEl.textContent = `✅ המוצר "${title}" נוסף בהצלחה!`;
-    }
+    statusEl.className = 'admin-status success';
+    statusEl.textContent = `✅ ${files.length} מוצרים נוספו בהצלחה!`;
 
     // Clear form
     document.getElementById('adminTitle').value = '';
     document.getElementById('adminPrice').value = '';
     document.getElementById('adminLink').value = '';
     fileInput.value = '';
-    document.getElementById('adminPreview').style.display = 'none';
+    document.getElementById('adminPreviewGrid').innerHTML = '';
 }
 
 function adminExportJSON() {
