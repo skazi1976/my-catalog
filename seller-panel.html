@@ -1051,12 +1051,63 @@ function renderChart(containerId, data, labelKey, valueKey) {
 
 // ==================== MESSAGES ====================
 let currentMsgId = null;
+let REAL_MESSAGES = [];
+const API_BASE = 'https://ali-findme-api.ohadf1976.workers.dev';
+
+async function loadMessages() {
+    const store = localStorage.getItem('sellerStore');
+    if (!store) return;
+    try {
+        const resp = await fetch(API_BASE + '/seller/messages?store=' + encodeURIComponent(store));
+        const data = await resp.json();
+        if (data.messages) {
+            // Group messages by customer email
+            const grouped = {};
+            data.messages.forEach(m => {
+                const email = m.email || m.to || 'unknown';
+                if (!grouped[email]) {
+                    grouped[email] = {
+                        id: email,
+                        sender: m.customerName || email,
+                        email: email,
+                        product: m.productName || m.product || '',
+                        productPrice: m.productPrice || '',
+                        productLink: m.productLink || '',
+                        buyLink: m.buyLink || '',
+                        messages: [],
+                        unread: false,
+                        time: ''
+                    };
+                }
+                const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleString('he-IL', {hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}) : '';
+                grouped[email].messages.push({
+                    from: m.from || 'customer',
+                    text: m.text || '',
+                    time: timeStr
+                });
+                grouped[email].time = timeStr;
+                if (m.from === 'customer' && !m.read) grouped[email].unread = true;
+                if (m.productName) grouped[email].product = m.productName;
+                if (m.buyLink) grouped[email].buyLink = m.buyLink;
+            });
+            REAL_MESSAGES = Object.values(grouped).reverse();
+        }
+    } catch (e) {
+        console.error('Load messages error:', e);
+    }
+    renderMessages('all');
+    updateBadge();
+}
 
 function renderMessages(filter) {
     const list = document.getElementById('messagesList');
-    const msgs = filter === 'unread' ? MOCK_MESSAGES.filter(m => m.unread) : MOCK_MESSAGES;
+    const msgs = filter === 'unread' ? REAL_MESSAGES.filter(m => m.unread) : REAL_MESSAGES;
+    if (msgs.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:#888;padding:40px;">📭 ' + (currentLang === 'he' ? 'אין הודעות' : 'No messages') + '</div>';
+        return;
+    }
     list.innerHTML = msgs.map(m => `
-        <div class="message-card ${m.unread ? 'unread' : ''}" onclick="openMessage(${m.id})">
+        <div class="message-card ${m.unread ? 'unread' : ''}" onclick="openMessage('${m.id}')">
             <div class="msg-header">
                 <div class="msg-sender">
                     ${m.unread ? '<span class="unread-dot"></span>' : ''}
@@ -1064,14 +1115,14 @@ function renderMessages(filter) {
                 </div>
                 <div class="msg-time">${m.time}</div>
             </div>
-            <div class="msg-product">📦 ${m.product} - ${m.productPrice}</div>
+            <div class="msg-product">📦 ${m.product}</div>
             <div class="msg-preview">${m.messages[m.messages.length-1].text}</div>
         </div>
     `).join('');
 }
 
 function openMessage(id) {
-    const msg = MOCK_MESSAGES.find(m => m.id === id);
+    const msg = REAL_MESSAGES.find(m => m.id === id);
     if (!msg) return;
     currentMsgId = id;
     msg.unread = false;
@@ -1084,10 +1135,9 @@ function openMessage(id) {
     const body = document.getElementById('msgDetailBody');
     body.innerHTML = `
         <div class="product-info">
-            <img src="${msg.productImg}" alt="${msg.product}">
+            <div style="width:60px;height:60px;background:#243444;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;">📦</div>
             <div class="prod-details">
                 <h4>${msg.product}</h4>
-                <div class="prod-price">${msg.productPrice}</div>
                 <a href="${msg.buyLink}" target="_blank" class="prod-link">${TRANSLATIONS[currentLang].buyLink}</a>
             </div>
         </div>
@@ -1117,7 +1167,7 @@ async function sendReply() {
     const text = document.getElementById('replyText').value.trim();
     if (!text || !currentMsgId) return;
 
-    const msg = MOCK_MESSAGES.find(m => m.id === currentMsgId);
+    const msg = REAL_MESSAGES.find(m => m.id === currentMsgId);
     if (!msg) return;
 
     const btn = document.querySelector('.reply-box button');
@@ -1125,8 +1175,7 @@ async function sendReply() {
     btn.textContent = '⏳...';
 
     try {
-        // Send email via Cloudflare Worker → Brevo
-        const resp = await fetch('https://ali-findme-api.ohadf1976.workers.dev/seller/reply', {
+        const resp = await fetch(API_BASE + '/seller/reply', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1135,9 +1184,8 @@ async function sendReply() {
                 customerName: msg.sender,
                 replyText: text,
                 productName: msg.product,
-                productPrice: msg.productPrice,
-                buyLink: msg.buyLink,
-                productImage: msg.productImg
+                productPrice: msg.productPrice || '',
+                buyLink: msg.buyLink
             })
         });
         const result = await resp.json();
@@ -1159,7 +1207,7 @@ async function sendReply() {
 }
 
 function updateBadge() {
-    const unread = MOCK_MESSAGES.filter(m => m.unread).length;
+    const unread = REAL_MESSAGES.filter(m => m.unread).length;
     const badge = document.getElementById('msgBadge');
     badge.textContent = unread;
     badge.style.display = unread > 0 ? 'flex' : 'none';
@@ -1238,15 +1286,18 @@ function showToast(text) {
 }
 
 // ==================== INIT ====================
-function initDashboard() {
+async function initDashboard() {
     setLang(currentLang);
     setTimeFilter('today', document.querySelector('#page-overview .filter-btn.active'));
     renderChart('viewsChart', MOCK_DAILY_VIEWS, 'day', 'value');
     renderChart('hourlyChart', MOCK_HOURLY, 'h', 'v');
-    renderMessages('all');
+    await loadMessages();
     renderProducts();
     renderTopProducts();
-    updateBadge();
+    // Update message count in stats
+    document.getElementById('statMessages').textContent = REAL_MESSAGES.length;
+    // Auto-refresh messages every 30 seconds
+    setInterval(loadMessages, 30000);
 }
 </script>
 
