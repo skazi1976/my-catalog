@@ -378,6 +378,20 @@
             z-index: 10;
             white-space: nowrap;
         }
+        .copy-product-link {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #aaa;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+        .copy-product-link:active { background: rgba(255,255,255,0.2); }
         .wa-share-btn {
             display: block;
             text-align: center;
@@ -730,7 +744,10 @@
     <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)">&#8249;</button>
     <img class="lightbox-img" id="lightboxImg" src="" alt="">
     <div class="lightbox-title" id="lightboxTitle"></div>
-    <a class="lightbox-wa-share" id="lightboxWAShare" href="#" target="_blank">💬 שתפו לחברה בוואטסאפ</a>
+    <div style="position:absolute;bottom:65px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10;">
+        <a class="lightbox-wa-share" id="lightboxWAShare" href="#" target="_blank" style="position:static;transform:none;">💬 שתפו לחברה</a>
+        <button class="lightbox-wa-share" onclick="copyProductLink(currentLightbox)" style="position:static;transform:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);">🔗 העתק קישור</button>
+    </div>
 </div>
 
 <!-- ===== TOAST ===== -->
@@ -808,7 +825,8 @@ function renderProducts() {
             <div class="card-info">
                 <div class="card-title">${p.title}</div>
                 <div class="card-price">₪${p.price} <span>כולל משלוח</span></div>
-                <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.href)}" target="_blank" class="wa-share-btn" onclick="event.stopPropagation()">💬 שתפו לחברה</a>
+                <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + i)}" target="_blank" class="wa-share-btn" onclick="event.stopPropagation()">💬 שתפו לחברה</a>
+                <button class="copy-product-link" onclick="event.stopPropagation();copyProductLink(${i})">🔗 העתק קישור</button>
                 <a href="${p.link}" target="_blank" rel="noopener" class="buy-btn">🛒 לרכישה</a>
             </div>
         </div>
@@ -877,7 +895,7 @@ function showLbImage() {
 
     const counter = currentLbImages.length > 1 ? ` (${currentLbImage + 1}/${currentLbImages.length})` : '';
     document.getElementById('lightboxTitle').textContent = p.title + counter;
-    document.getElementById('lightboxWAShare').href = 'https://wa.me/?text=' + encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.href);
+    document.getElementById('lightboxWAShare').href = 'https://wa.me/?text=' + encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + i);
 }
 
 function closeLightbox() {
@@ -911,6 +929,24 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') navLightbox(-1); // RTL
     if (e.key === 'ArrowLeft') navLightbox(1);
 });
+
+// Copy individual product link
+function copyProductLink(index) {
+    const p = PRODUCTS[index];
+    const link = window.location.origin + window.location.pathname + '?p=' + index;
+    navigator.clipboard.writeText(link).then(() => {
+        showToast('✅ קישור למוצר הועתק!');
+    }).catch(() => {
+        // Fallback for mobile
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('✅ קישור למוצר הועתק!');
+    });
+}
 
 // Copy link
 function copyLink() {
@@ -1125,8 +1161,14 @@ function adminExportJSON() {
     });
 }
 
-// Init - load products from cloud
-loadProducts();
+// Init - load products from cloud, then check for shared product link
+loadProducts().then(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pIdx = params.get('p');
+    if (pIdx !== null && PRODUCTS[parseInt(pIdx)]) {
+        setTimeout(() => openLightbox(parseInt(pIdx)), 500);
+    }
+});
 </script>
 </body>
 </html>
