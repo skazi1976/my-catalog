@@ -1026,11 +1026,11 @@ async function adminUploadMultiple() {
             try {
                 const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
                 const key = `gallery/${Date.now()}_${uploaded}.${ext}`;
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('key', key);
-                const resp = await fetch(R2_CONFIG.uploadWorkerUrl, {
-                    method: 'POST', body: formData
+                const buf = await file.arrayBuffer();
+                const resp = await fetch(R2_CONFIG.uploadWorkerUrl.replace('/upload', '/r2put') + '?key=' + encodeURIComponent(key), {
+                    method: 'PUT',
+                    headers: { 'Content-Type': file.type || 'image/jpeg' },
+                    body: buf
                 });
                 const data = await resp.json();
                 if (!resp.ok || !data.success) throw new Error(data.error || 'Upload failed: ' + resp.status);
