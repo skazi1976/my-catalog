@@ -712,7 +712,11 @@
    PRODUCTS DATA - ADD YOUR PRODUCTS HERE
    Each product: { img: "URL", title: "שם", price: 99, link: "URL" }
    ========================================================== */
-const PRODUCTS = [];
+const PRODUCTS = JSON.parse(localStorage.getItem('galleryProducts') || '[]');
+
+function saveProducts() {
+    localStorage.setItem('galleryProducts', JSON.stringify(PRODUCTS));
+}
 
 /* ========================================================== */
 
@@ -1039,6 +1043,7 @@ async function adminUploadMultiple() {
     };
 
     PRODUCTS.push(product);
+    saveProducts();
     renderProducts();
     statusEl.className = 'admin-status success';
     statusEl.textContent = `✅ "${title}" נוסף עם ${files.length} תמונות!`;
