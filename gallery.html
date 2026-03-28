@@ -1166,20 +1166,28 @@ loadProducts().then(() => {
     const params = new URLSearchParams(window.location.search);
     const pIdx = params.get('p');
     if (pIdx !== null && PRODUCTS[parseInt(pIdx)]) {
-        // Single product view - show only this product
+        // Single product view - show only this product with built-in gallery
         const p = PRODUCTS[parseInt(pIdx)];
         const i = parseInt(pIdx);
+        const imgs = p.images || [p.img];
         document.querySelector('.hero').style.display = 'none';
+
+        // Build image gallery with swipe
+        let spIdx = 0;
         document.getElementById('productGrid').innerHTML = `
             <div style="grid-column:1/-1;max-width:500px;margin:0 auto;">
                 <div class="product-card visible" data-index="${i}">
-                    <div class="card-image-wrap" onclick="openLightbox(${i})" style="padding-top:100%;">
-                        ${p.isVideo ?
-                            `<video src="${p.img}" muted loop playsinline style="position:absolute;top:0;width:100%;height:100%;object-fit:cover;"></video>` :
-                            `<img src="${p.img}" alt="${p.title}" style="position:absolute;top:0;width:100%;height:100%;object-fit:cover;">`
-                        }
-                        ${p.images && p.images.length > 1 ? `<div style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.7);color:#fff;padding:3px 8px;border-radius:6px;font-size:12px;">📸 ${p.images.length}</div>` : ''}
+                    <div style="position:relative;overflow:hidden;border-radius:12px;background:#111;">
+                        <img id="spMainImg" src="${imgs[0]}" alt="${p.title}" style="width:100%;display:block;">
+                        ${imgs.length > 1 ? `
+                            <button onclick="spNav(-1)" style="position:absolute;top:50%;left:10px;transform:translateY(-50%);width:40px;height:40px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);border-radius:50%;color:#fff;font-size:20px;cursor:pointer;z-index:5;">›</button>
+                            <button onclick="spNav(1)" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);width:40px;height:40px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);border-radius:50%;color:#fff;font-size:20px;cursor:pointer;z-index:5;">‹</button>
+                            <div id="spCounter" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:#fff;padding:4px 12px;border-radius:12px;font-size:13px;">1 / ${imgs.length}</div>
+                        ` : ''}
                     </div>
+                    ${imgs.length > 1 ? `
+                        <div id="spThumbs" style="display:flex;gap:6px;overflow-x:auto;padding:10px 0;"></div>
+                    ` : ''}
                     <div class="card-info">
                         <div class="card-title" style="font-size:18px;-webkit-line-clamp:unset;">${p.title}</div>
                         <div class="card-price" style="font-size:24px;">₪${p.price} <span>כולל משלוח</span></div>
@@ -1190,9 +1198,49 @@ loadProducts().then(() => {
                 <a href="${window.location.pathname}" style="display:block;text-align:center;color:#aaa;margin-top:20px;text-decoration:none;font-size:14px;">← לכל המוצרים בגלריה</a>
             </div>
         `;
-        // Make lightbox work for this product
-        currentLbImages = p.images || [p.img];
-        currentLbImage = 0;
+
+        // Build thumbnails
+        const spImages = imgs;
+        if (imgs.length > 1) {
+            const thumbs = document.getElementById('spThumbs');
+            imgs.forEach((img, idx) => {
+                const th = document.createElement('img');
+                th.src = img;
+                th.style.cssText = 'width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;' + (idx === 0 ? 'border:2px solid #00e676;' : 'border:2px solid #333;opacity:0.6;');
+                th.onclick = () => spGoTo(idx);
+                thumbs.appendChild(th);
+            });
+        }
+
+        // Navigation functions
+        window.spNav = function(dir) {
+            spIdx = (spIdx - dir + spImages.length) % spImages.length;
+            spGoTo(spIdx);
+        };
+        window.spGoTo = function(idx) {
+            spIdx = idx;
+            document.getElementById('spMainImg').src = spImages[idx];
+            document.getElementById('spCounter').textContent = (idx + 1) + ' / ' + spImages.length;
+            const thumbs = document.getElementById('spThumbs');
+            if (thumbs) {
+                thumbs.querySelectorAll('img').forEach((th, j) => {
+                    th.style.border = j === idx ? '2px solid #00e676' : '2px solid #333';
+                    th.style.opacity = j === idx ? '1' : '0.6';
+                });
+            }
+        };
+
+        // Swipe support for mobile
+        let touchStartX = 0;
+        const mainImg = document.getElementById('spMainImg');
+        mainImg.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+        mainImg.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) spNav(-1); // swipe left = next (RTL)
+                else spNav(1); // swipe right = prev
+            }
+        });
     }
 });
 </script>
