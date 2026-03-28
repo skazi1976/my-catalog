@@ -759,6 +759,7 @@
    Each product: { img: "URL", title: "שם", price: 99, link: "URL" }
    ========================================================== */
 let PRODUCTS = [];
+const IS_ADMIN = new URLSearchParams(window.location.search).get('admin') === '1';
 
 async function loadProducts() {
     try {
@@ -1035,7 +1036,7 @@ function showToast(msg) {
 }
 
 // ===== ADMIN PANEL =====
-if (new URLSearchParams(window.location.search).get('admin') === '1') {
+if (IS_ADMIN) {
     document.getElementById('adminPanel').classList.add('active');
 }
 
