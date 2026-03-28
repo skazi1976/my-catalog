@@ -1177,7 +1177,7 @@ async function sendReply() {
     try {
         const resp = await fetch(API_BASE + '/seller/reply', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Seller-Token': localStorage.getItem('sellerToken') || '' },
             body: JSON.stringify({
                 sellerStore: localStorage.getItem('sellerStore') || '',
                 customerEmail: msg.email,
