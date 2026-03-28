@@ -990,7 +990,7 @@ async function saveEdit(index) {
     if (zaraPrice) PRODUCTS[index].zaraPrice = zaraPrice;
 
     try {
-        await fetch(API_BASE + '/gallery/products', {
+        await fetch('https://ali-findme-api.ohadf1976.workers.dev/gallery/products', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({products: PRODUCTS})
@@ -1009,7 +1009,7 @@ async function deleteProduct(index) {
 
     PRODUCTS.splice(index, 1);
     try {
-        await fetch(API_BASE + '/gallery/products', {
+        await fetch('https://ali-findme-api.ohadf1976.workers.dev/gallery/products', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({products: PRODUCTS})
