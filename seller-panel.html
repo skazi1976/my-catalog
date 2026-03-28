@@ -862,7 +862,7 @@ function setLang(lang) {
     // Re-render charts with translated days
     if (document.getElementById('dashboard').classList.contains('active')) {
         const days = t.days;
-        const dailyData = MOCK_DAILY_VIEWS.map((d, i) => ({ day: days[6-i] || d.day, value: d.value }));
+        const dailyData = REAL_DAILY_VIEWS.map((d, i) => ({ day: days[6-i] || d.day, value: d.value }));
         renderChart('viewsChart', dailyData, 'day', 'value');
     }
 }
@@ -922,39 +922,48 @@ const MOCK_MESSAGES = [
     }
 ];
 
-const MOCK_STATS = {
-    today: { views: 234, clicks: 45, messages: 3, conversion: '19.2%' },
-    week: { views: 1520, clicks: 312, messages: 18, conversion: '20.5%' },
-    month: { views: 5830, clicks: 1105, messages: 67, conversion: '18.9%' }
+// Real stats - loaded from API
+let REAL_STATS = {
+    today: { views: 0, clicks: 0, messages: 0, conversion: '0%' },
+    week: { views: 0, clicks: 0, messages: 0, conversion: '0%' },
+    month: { views: 0, clicks: 0, messages: 0, conversion: '0%' }
 };
 
-const MOCK_DAILY_VIEWS = [
-    { day: 'שבת', value: 180 },
-    { day: 'שישי', value: 310 },
-    { day: 'חמישי', value: 245 },
-    { day: 'רביעי', value: 420 },
-    { day: 'שלישי', value: 380 },
-    { day: 'שני', value: 290 },
-    { day: 'ראשון', value: 350 }
+let REAL_DAILY_VIEWS = [
+    { day: 'שבת', value: 0 }, { day: 'שישי', value: 0 },
+    { day: 'חמישי', value: 0 }, { day: 'רביעי', value: 0 },
+    { day: 'שלישי', value: 0 }, { day: 'שני', value: 0 },
+    { day: 'ראשון', value: 0 }
 ];
 
-const MOCK_HOURLY = [
-    {h:'06',v:5},{h:'07',v:12},{h:'08',v:25},{h:'09',v:45},{h:'10',v:60},
-    {h:'11',v:55},{h:'12',v:40},{h:'13',v:35},{h:'14',v:50},{h:'15',v:65},
-    {h:'16',v:70},{h:'17',v:55},{h:'18',v:80},{h:'19',v:95},{h:'20',v:120},
-    {h:'21',v:105},{h:'22',v:75},{h:'23',v:30}
+let REAL_HOURLY = [
+    {h:'06',v:0},{h:'07',v:0},{h:'08',v:0},{h:'09',v:0},{h:'10',v:0},
+    {h:'11',v:0},{h:'12',v:0},{h:'13',v:0},{h:'14',v:0},{h:'15',v:0},
+    {h:'16',v:0},{h:'17',v:0},{h:'18',v:0},{h:'19',v:0},{h:'20',v:0},
+    {h:'21',v:0},{h:'22',v:0},{h:'23',v:0}
 ];
 
-const MOCK_PRODUCTS = [
-    { name: 'NIKE Dunk Low Pink', price: '₪141', views: 89, clicks: 23, msgs: 5, img: '' },
-    { name: 'GUCCI Marmont Bag', price: '₪391', views: 76, clicks: 18, msgs: 3, img: '' },
-    { name: 'Rolex Submariner', price: '₪257', views: 65, clicks: 15, msgs: 2, img: '' },
-    { name: 'Ray-Ban Aviator', price: '₪79', views: 54, clicks: 12, msgs: 1, img: '' },
-    { name: 'Nike Air Force 1', price: '₪100', views: 48, clicks: 11, msgs: 2, img: '' },
-    { name: 'Cartier Love Bracelet', price: '₪368', views: 42, clicks: 9, msgs: 1, img: '' },
-    { name: 'Adidas Yeezy 350', price: '₪219', views: 38, clicks: 8, msgs: 0, img: '' },
-    { name: 'LV Neverfull Bag', price: '₪450', views: 35, clicks: 7, msgs: 2, img: '' }
-];
+let REAL_PRODUCTS = [];
+
+async function loadStats() {
+    const store = localStorage.getItem('sellerStore');
+    if (!store) return;
+    try {
+        const resp = await fetch(API_BASE + '/seller/stats?store=' + encodeURIComponent(store));
+        const data = await resp.json();
+        if (data.stats) {
+            REAL_STATS = data.stats;
+            if (data.daily) REAL_DAILY_VIEWS = data.daily;
+            if (data.hourly) REAL_HOURLY = data.hourly;
+            if (data.products) REAL_PRODUCTS = data.products;
+            setTimeFilter('today', document.querySelector('#page-overview .filter-btn.active'));
+            renderChart('viewsChart', REAL_DAILY_VIEWS, 'day', 'value');
+            renderChart('hourlyChart', REAL_HOURLY, 'h', 'v');
+            renderProducts();
+            renderTopProducts();
+        }
+    } catch (e) { console.error('Stats error:', e); }
+}
 
 // ==================== LOGIN ====================
 async function doLogin() {
@@ -1028,7 +1037,7 @@ function showPage(page, el) {
 function setTimeFilter(period, btn) {
     document.querySelectorAll('.section-header .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const stats = MOCK_STATS[period];
+    const stats = REAL_STATS[period];
     document.getElementById('statViews').textContent = stats.views.toLocaleString();
     document.getElementById('statClicks').textContent = stats.clicks.toLocaleString();
     document.getElementById('statMessages').textContent = stats.messages;
@@ -1217,8 +1226,8 @@ function updateBadge() {
 function renderProducts(filter) {
     const tbody = document.getElementById('productsTableBody');
     const filtered = filter ?
-        MOCK_PRODUCTS.filter(p => p.name.toLowerCase().includes(filter.toLowerCase())) :
-        MOCK_PRODUCTS;
+        REAL_PRODUCTS.filter(p => p.name.toLowerCase().includes(filter.toLowerCase())) :
+        REAL_PRODUCTS;
 
     document.getElementById('productCount').textContent = filtered.length;
     tbody.innerHTML = filtered.map(p => `
@@ -1244,7 +1253,7 @@ function filterProducts(val) {
 // ==================== TOP PRODUCTS ====================
 function renderTopProducts() {
     const container = document.getElementById('topProducts');
-    container.innerHTML = MOCK_PRODUCTS.slice(0, 6).map(p => `
+    container.innerHTML = REAL_PRODUCTS.slice(0, 6).map(p => `
         <div class="top-product-card">
             <div style="height:140px;background:linear-gradient(135deg,#243444,#1a2a3a);display:flex;align-items:center;justify-content:center;font-size:48px;">📦</div>
             <div class="tpc-info">
@@ -1289,15 +1298,15 @@ function showToast(text) {
 async function initDashboard() {
     setLang(currentLang);
     setTimeFilter('today', document.querySelector('#page-overview .filter-btn.active'));
-    renderChart('viewsChart', MOCK_DAILY_VIEWS, 'day', 'value');
-    renderChart('hourlyChart', MOCK_HOURLY, 'h', 'v');
-    await loadMessages();
+    renderChart('viewsChart', REAL_DAILY_VIEWS, 'day', 'value');
+    renderChart('hourlyChart', REAL_HOURLY, 'h', 'v');
     renderProducts();
     renderTopProducts();
-    // Update message count in stats
+    await loadMessages();
+    await loadStats();
     document.getElementById('statMessages').textContent = REAL_MESSAGES.length;
-    // Auto-refresh messages every 30 seconds
-    setInterval(loadMessages, 30000);
+    // Auto-refresh every 30 seconds
+    setInterval(async () => { await loadMessages(); await loadStats(); }, 30000);
 }
 </script>
 

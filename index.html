@@ -1770,6 +1770,15 @@
             const title = product.t;
             const link = product.l;
             const hasAffiliate = product.a;
+            // Track product view
+            var store = getStore(product);
+            if (store) {
+                fetch(SELLER_API + '/seller/track', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({store:store, event:'view', product:title, productId: getProductId(product, productIndex)})
+                }).catch(function(){});
+            }
             
             lbImages = images;
             lbIndex = 0;
@@ -1791,7 +1800,18 @@
             const noLink = document.getElementById('lbNoLink');
             
             btn.href = link;
-            btn.onclick = function(e) { e.preventDefault(); window.open(link, '_blank'); };
+            btn.onclick = function(e) {
+                e.preventDefault();
+                var s = getStore(product);
+                if (s) {
+                    fetch(SELLER_API + '/seller/track', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({store:s, event:'click', product:title, productId: getProductId(product, productIndex)})
+                    }).catch(function(){});
+                }
+                window.open(link, '_blank');
+            };
             const isFlyLink = link && link.includes('flylinking.com');
             const appBtn = document.getElementById('lbAppBtn');
             const step1 = document.getElementById('lbStep1Text');
