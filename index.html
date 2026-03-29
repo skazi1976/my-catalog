@@ -1825,26 +1825,19 @@
                 btnTop.href = link;
                 btnTop.style.display = '';
                 btnTop.onclick = btn.onclick;
-                const couponEl = document.getElementById('lbCoupon');
-                const couponCode = document.getElementById('lbCouponCode');
                 if (isFlyLink) {
                     btn.textContent = '🛒 קנו עכשיו';
                     btnTop.textContent = '🛒 קנו עכשיו';
                     appBtn.style.display = 'none';
                     step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר ב-FLYLINK';
                     step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט ב-FLYLINK';
-                    // Show coupon if product has one
                     if (product.coupon) {
-                        couponEl.style.display = 'block';
-                        couponCode.textContent = product.coupon;
                         couponTop.style.display = 'block';
                         couponCodeTop.textContent = product.coupon;
                     } else {
-                        couponEl.style.display = 'none';
                         couponTop.style.display = 'none';
                     }
                 } else {
-                    couponEl.style.display = 'none';
                     couponTop.style.display = 'none';
                     btn.textContent = '🛒 קנו בעליבאבא';
                     btnTop.textContent = '🛒 קנו בעליבאבא';
