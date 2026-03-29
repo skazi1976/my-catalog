@@ -826,7 +826,7 @@ function renderProducts() {
             <div class="card-info">
                 <div class="card-title">${p.title}</div>
                 <div class="card-price">₪${p.price} <span>כולל משלוח</span></div>
-                <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + i)}" target="_blank" class="wa-share-btn" onclick="event.stopPropagation()">💬 שתפו לחברה</a>
+                <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + (p.title||'').replace(/[^\w\sא-ת₪\-\.]/g,'') + ' - ₪' + p.price + '\n' + window.location.origin + window.location.pathname + '?p=' + i)}" target="_blank" class="wa-share-btn" onclick="event.stopPropagation()">💬 שתפו לחברה</a>
                 <button class="copy-product-link" onclick="event.stopPropagation();copyProductLink(${i})">🔗 העתק קישור</button>
                 <a href="${p.link}" target="_blank" rel="noopener" class="buy-btn">🛒 לרכישה</a>
                 ${IS_ADMIN ? `<div class="admin-btns" style="display:flex;gap:6px;margin-top:6px;">
