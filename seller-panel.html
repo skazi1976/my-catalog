@@ -1305,7 +1305,7 @@ async function loadProductCount() {
     const store = localStorage.getItem('sellerStore');
     if (!store) return;
     try {
-        const resp = await fetch('data.json');
+        const resp = await fetch('data.json?v=' + Date.now());
         const data = await resp.json();
         let total = 0, withPrice = 0;
         for (const p of data) {
