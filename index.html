@@ -1799,7 +1799,7 @@
         let lbIndex = 0;
         
         function copyCode() {
-            const code = document.getElementById('lbCouponCode').textContent;
+            const code = document.getElementById('lbCouponCodeTop').textContent;
             navigator.clipboard.writeText(code).then(() => {
                 const btn = event.target;
                 btn.textContent = '✅ הועתק!';
@@ -1868,8 +1868,8 @@
                 btnTop.href = link;
                 btnTop.style.display = '';
                 btnTop.onclick = btn.onclick;
-                const couponEl = document.getElementById('lbCouponTop'); // fixed
-                const couponCode = document.getElementById('lbCouponCode');
+                const couponEl = document.getElementById('lbCouponTop');
+                const couponCode = document.getElementById('lbCouponCodeTop');
                 if (isFlyLink) {
                     btn.textContent = '🛒 קנו עכשיו';
                     btnTop.textContent = '🛒 קנו עכשיו';
