@@ -1343,34 +1343,48 @@
         let currentSort = 'default';
         let currentBrand = '';
 
-        // Fix price display: ensure ₪ symbol is correct
-        var USD_TO_ILS = 3.14;
+        // Live exchange rate USD→ILS
+        var USD_TO_ILS = 3.14; // fallback
         function fixPrice(p) {
             if (!p) return p;
             // Fix corrupted shekel: ג‚× (charCodes 1490,8218,215) → ₪
             p = p.replace(/\u05D2\u201A\u00D7/g, '₪');
-            // Convert dollar prices to ILS: "68.64$" or "$68.64" → "₪249"
-            var dollarMatch = p.match(/^\$?(\d+\.?\d*)\$?$/);
-            if (dollarMatch && p.includes('$')) {
-                var ils = Math.round(parseFloat(dollarMatch[1]) * USD_TO_ILS);
-                return '₪' + ils;
+            // Convert dollar prices to ILS: "$68.64" → "₪216"
+            var dollarMatch = p.match(/^\$(\d+\.?\d*)$/);
+            if (dollarMatch) {
+                return '₪' + Math.round(parseFloat(dollarMatch[1]) * USD_TO_ILS);
+            }
+            // Also handle "68.64$" format
+            var dollarMatch2 = p.match(/^(\d+\.?\d*)\$$/);
+            if (dollarMatch2) {
+                return '₪' + Math.round(parseFloat(dollarMatch2[1]) * USD_TO_ILS);
             }
             // Raw number without symbol → convert USD to ILS
             if (/^\d+(\.\d+)?$/.test(p)) {
-                var val = parseFloat(p);
-                if (val < 500) { return '₪' + Math.round(val * USD_TO_ILS); }
-                return '₪' + Math.round(val);
+                return '₪' + Math.round(parseFloat(p) * USD_TO_ILS);
             }
             return p;
         }
 
-        // Load product data
+        // Fetch live exchange rate then load products
+        fetch('https://api.exchangerate-api.com/v4/latest/USD')
+            .then(function(r) { return r.json(); })
+            .then(function(rateData) {
+                USD_TO_ILS = rateData.rates.ILS || 3.14;
+                console.log('Exchange rate USD→ILS:', USD_TO_ILS);
+            })
+            .catch(function() { console.log('Using fallback rate:', USD_TO_ILS); })
+            .finally(function() {
+                // Load product data after exchange rate is ready
+                loadProducts();
+            });
+
+        function loadProducts() {
         fetch('data.json')
             .then(r => r.text())
             .then(text => {
-                // Force correct UTF-8 decode if needed
                 var data = JSON.parse(text);
-                // Fix all prices
+                // Fix all prices with live exchange rate
                 data.forEach(function(p) { if (p.p) p.p = fixPrice(p.p); });
                 return data;
             })
@@ -1389,6 +1403,7 @@
             .catch(e => {
                 document.getElementById('grid').innerHTML = '<div class="no-results" style="display:block">שגיאה בטעינת המוצרים</div>';
             });
+        }
 
         // Brand chips - auto-detect from titles (including abbreviations)
         const BRAND_MAP = {
