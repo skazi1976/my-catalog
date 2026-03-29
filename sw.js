@@ -56,3 +56,26 @@ self.addEventListener('fetch', (e) => {
         }).catch(() => caches.match(e.request))
     );
 });
+
+// Push Notifications
+self.addEventListener('push', (e) => {
+    let data = {title: 'HaCatalog', body: 'מוצרים חדשים בקטלוג!', icon: './icon-192.png', url: './'};
+    try { data = Object.assign(data, e.data.json()); } catch(err) {}
+    e.waitUntil(
+        self.registration.showNotification(data.title, {
+            body: data.body,
+            icon: data.icon || './icon-192.png',
+            badge: './icon-192.png',
+            dir: 'rtl',
+            lang: 'he',
+            data: {url: data.url || './'},
+            actions: [{action: 'open', title: 'פתח'}]
+        })
+    );
+});
+
+self.addEventListener('notificationclick', (e) => {
+    e.notification.close();
+    const url = e.notification.data?.url || './';
+    e.waitUntil(clients.openWindow(url));
+});
