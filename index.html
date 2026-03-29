@@ -1267,6 +1267,15 @@
                     <button onclick="shareProductTelegram()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:#0088cc;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📨 טלגרם</button>
                     <button onclick="copyProductLink()" style="flex:1;min-width:90px;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);">📋 העתיקו</button>
                 </div>
+                <div id="lbCouponTop" style="display:none;background:linear-gradient(135deg,#1a3a1a,#0d2b0d);border:2px dashed #4CAF50;border-radius:14px;padding:15px;margin-bottom:15px;text-align:center;">
+                    <div style="color:#4CAF50;font-size:13px;margin-bottom:5px">🎁 קופון משלוח חינם</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px">
+                        <span id="lbCouponCodeTop" style="font-size:22px;font-weight:800;color:#fff;letter-spacing:2px;font-family:monospace"></span>
+                        <button onclick="copyCode()" style="background:#4CAF50;color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:Heebo">📋 העתק</button>
+                    </div>
+                    <div style="color:#888;font-size:11px;margin-top:5px">הזינו את הקופון בעמוד התשלום ב-FlyLink</div>
+                </div>
+                <a class="lb-buy-btn" id="lbBuyBtnTop" href="#" target="_blank" style="margin-bottom:12px;">🛒 קנו עכשיו</a>
                 <button class="lb-buy-btn" id="lbChatBtn" onclick="openSellerChat()" style="display:none;margin-bottom:12px;background:linear-gradient(135deg,#00c853,#009624);border:none;cursor:pointer;color:#fff;font-size:16px;width:100%;padding:14px 20px;border-radius:12px;font-weight:bold;">💬 צור קשר עם המוכר <span style="display:inline-block;width:8px;height:8px;background:#0f0;border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite;"></span></button>
                 <div class="lb-how-to">
                     <div style="text-align:center;padding:12px;margin-bottom:16px;background:linear-gradient(135deg,rgba(0,212,170,0.1),rgba(255,215,0,0.1));border-radius:12px;border:1px solid var(--border);">
@@ -1816,11 +1825,19 @@
             const appBtn = document.getElementById('lbAppBtn');
             const step1 = document.getElementById('lbStep1Text');
             const step5 = document.getElementById('lbStep5Text');
+            // Top buy button + coupon
+            const btnTop = document.getElementById('lbBuyBtnTop');
+            const couponTop = document.getElementById('lbCouponTop');
+            const couponCodeTop = document.getElementById('lbCouponCodeTop');
             if (hasAffiliate) {
+                btnTop.href = link;
+                btnTop.style.display = '';
+                btnTop.onclick = btn.onclick;
                 const couponEl = document.getElementById('lbCoupon');
                 const couponCode = document.getElementById('lbCouponCode');
                 if (isFlyLink) {
                     btn.textContent = '🛒 קנו עכשיו';
+                    btnTop.textContent = '🛒 קנו עכשיו';
                     appBtn.style.display = 'none';
                     step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר ב-FLYLINK';
                     step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט ב-FLYLINK';
@@ -1828,12 +1845,17 @@
                     if (product.coupon) {
                         couponEl.style.display = 'block';
                         couponCode.textContent = product.coupon;
+                        couponTop.style.display = 'block';
+                        couponCodeTop.textContent = product.coupon;
                     } else {
                         couponEl.style.display = 'none';
+                        couponTop.style.display = 'none';
                     }
                 } else {
                     couponEl.style.display = 'none';
+                    couponTop.style.display = 'none';
                     btn.textContent = '🛒 קנו בעליבאבא';
+                    btnTop.textContent = '🛒 קנו בעליבאבא';
                     appBtn.style.display = '';
                     step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא';
                     step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט בעליבאבא';
@@ -1845,6 +1867,8 @@
                 btn.className = 'lb-buy-btn secondary';
                 noLink.style.display = 'block';
                 appBtn.style.display = '';
+                btnTop.style.display = 'none';
+                couponTop.style.display = 'none';
                 step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר בעליבאבא';
                 step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט בעליבאבא';
             }
