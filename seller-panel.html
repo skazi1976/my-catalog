@@ -617,6 +617,12 @@
                     <div class="stat-label" data-i18n="conversionRate">שיעור המרה</div>
                     <div class="stat-change up">↑ 2.1%</div>
                 </div>
+                <div class="stat-card" style="border-top:3px solid #9c27b0;">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-value" id="statProductCount">—</div>
+                    <div class="stat-label" data-i18n="totalProducts">מוצרים בחנות</div>
+                    <div class="stat-change" id="statProductWithPrice" style="color:#8899aa;">טוען...</div>
+                </div>
             </div>
 
             <!-- Chart -->
@@ -759,7 +765,7 @@ const TRANSLATIONS = {
         navAnalytics: 'ניתוח נתונים', navSettings: 'הגדרות',
         overviewTitle: 'סקירה כללית', today: 'היום', week: 'שבוע', month: 'חודש',
         productViews: 'צפיות במוצרים', buyClicks: 'לחיצות על רכישה',
-        newMessages: 'הודעות חדשות', conversionRate: 'שיעור המרה',
+        newMessages: 'הודעות חדשות', conversionRate: 'שיעור המרה', totalProducts: 'מוצרים בחנות',
         fromYesterday: '↑ 12% מאתמול', newCount: '↑ 3 חדשות',
         chartTitle: 'צפיות במוצרים - 7 ימים אחרונים', topProducts: 'מוצרים מובילים',
         all: 'הכל', unread: 'לא נקראו', back: '← חזרה',
@@ -783,7 +789,7 @@ const TRANSLATIONS = {
         navAnalytics: 'Analytics', navSettings: 'Settings',
         overviewTitle: 'Overview', today: 'Today', week: 'Week', month: 'Month',
         productViews: 'Product Views', buyClicks: 'Buy Clicks',
-        newMessages: 'New Messages', conversionRate: 'Conversion Rate',
+        newMessages: 'New Messages', conversionRate: 'Conversion Rate', totalProducts: 'Products in Store',
         fromYesterday: '↑ 12% from yesterday', newCount: '↑ 3 new',
         chartTitle: 'Product Views - Last 7 Days', topProducts: 'Top Products',
         all: 'All', unread: 'Unread', back: '← Back',
@@ -807,7 +813,7 @@ const TRANSLATIONS = {
         navAnalytics: '数据分析', navSettings: '设置',
         overviewTitle: '概览', today: '今天', week: '本周', month: '本月',
         productViews: '产品浏览量', buyClicks: '购买点击',
-        newMessages: '新消息', conversionRate: '转化率',
+        newMessages: '新消息', conversionRate: '转化率', totalProducts: '店铺产品数',
         fromYesterday: '↑ 比昨天增长12%', newCount: '↑ 3条新消息',
         chartTitle: '产品浏览量 - 最近7天', topProducts: '热门产品',
         all: '全部', unread: '未读', back: '← 返回',
@@ -1295,6 +1301,35 @@ function showToast(text) {
 }
 
 // ==================== INIT ====================
+async function loadProductCount() {
+    const store = localStorage.getItem('sellerStore');
+    if (!store) return;
+    try {
+        const resp = await fetch('data.json');
+        const data = await resp.json();
+        let total = 0, withPrice = 0;
+        for (const p of data) {
+            let pStore = '';
+            const link = p.l || '';
+            const title = p.t || '';
+            const imgs = p.i || [];
+            const img = imgs[0] || '';
+            if (link.includes('flylinking.com') || img.includes('/xuxu/')) pStore = 'xuxuxuxux';
+            else if (title.startsWith('ZAD')) pStore = 'zad2025';
+            else if (title.startsWith('AL')) pStore = 'alibaba';
+            if (pStore === store || (store === 'zad2025' && pStore === 'zad2025') || (store === 'xuxuxuxux' && pStore === 'xuxuxuxux')) {
+                total++;
+                if (p.p) withPrice++;
+            }
+        }
+        document.getElementById('statProductCount').textContent = total;
+        const lang = currentLang || 'he';
+        const labels = {he: 'עם מחיר', en: 'with price', zh: '有价格'};
+        document.getElementById('statProductWithPrice').textContent = withPrice + ' ' + (labels[lang] || labels.he);
+        document.getElementById('statProductWithPrice').style.color = withPrice === total ? '#00e676' : '#ff9800';
+    } catch (e) { console.error('Product count error:', e); }
+}
+
 async function initDashboard() {
     setLang(currentLang);
     setTimeFilter('today', document.querySelector('#page-overview .filter-btn.active'));
@@ -1304,6 +1339,7 @@ async function initDashboard() {
     renderTopProducts();
     await loadMessages();
     await loadStats();
+    await loadProductCount();
     document.getElementById('statMessages').textContent = REAL_MESSAGES.length;
     // Auto-refresh every 30 seconds
     setInterval(async () => { await loadMessages(); await loadStats(); }, 30000);
