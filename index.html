@@ -1343,9 +1343,28 @@
         let currentSort = 'default';
         let currentBrand = '';
 
+        // Fix price display: ensure ₪ symbol is correct
+        function fixPrice(p) {
+            if (!p) return p;
+            // Fix corrupted shekel: ג‚× (charCodes 1490,8218,215) → ₪
+            p = p.replace(/\u05D2\u201A\u00D7/g, '₪');
+            // Add ₪ to raw numbers from FlyLink (e.g. "38.99" → "₪38.99")
+            if (/^\d+(\.\d+)?$/.test(p)) p = '₪' + p;
+            // Fix dollar display: "36.99$" → "$36.99"
+            if (/^\d+(\.\d+)?\$$/.test(p)) p = '$' + p.replace('$','');
+            return p;
+        }
+
         // Load product data
         fetch('data.json')
-            .then(r => r.json())
+            .then(r => r.text())
+            .then(text => {
+                // Force correct UTF-8 decode if needed
+                var data = JSON.parse(text);
+                // Fix all prices
+                data.forEach(function(p) { if (p.p) p.p = fixPrice(p.p); });
+                return data;
+            })
             .then(data => {
                 PRODUCTS = data;
                 buildBrandChips();
