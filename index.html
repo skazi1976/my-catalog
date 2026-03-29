@@ -2409,6 +2409,8 @@ function getStore(product) {
     if (!product) return '';
     // FlyLink products all belong to xuxuxuxux
     if (product.l && product.l.includes('flylinking.com')) return 'xuxuxuxux';
+    // ZAD products identified by title
+    if (product.t && product.t.startsWith('ZAD')) return 'zad2025';
     if (!product.i || !product.i[0]) return '';
     // xuxuxuxux products have images like r2.dev/xuxu/xxx.jpg
     if (product.i[0].includes('/xuxu/')) return 'xuxuxuxux';
@@ -2417,7 +2419,7 @@ function getStore(product) {
     var code = STORE_MAP[m[1]] || '';
     if (code === 'X') return 'xuxuxuxux';
     if (code === 'T') return 'TOP-B111';
-    if (code === 'Z') return 'ZAD2025';
+    if (code === 'Z') return 'zad2025';
     return '';
 }
 
