@@ -1390,15 +1390,39 @@
             })
             .then(data => {
                 PRODUCTS = data;
-                buildBrandChips();
-                filterProducts();
-                // Direct product link via hash
-                var hash = window.location.hash;
-                if (hash && hash.startsWith('#product=')) {
-                    var albumId = hash.replace('#product=', '');
-                    var idx = findProductByAlbumId(albumId);
-                    if (idx >= 0) openLightbox(idx);
-                }
+                // Load seller price overrides from KV
+                var stores = ['zad2025', 'xuxuxuxux'];
+                var pricePromises = stores.map(function(s) {
+                    return fetch('https://ali-findme-api.ohadf1976.workers.dev/seller/prices?store=' + s)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) { return {store: s, prices: d.prices || {}}; })
+                        .catch(function() { return {store: s, prices: {}}; });
+                });
+                Promise.all(pricePromises).then(function(results) {
+                    results.forEach(function(res) {
+                        var prices = res.prices;
+                        for (var pid in prices) {
+                            // Find product by productId and apply price override
+                            for (var i = 0; i < PRODUCTS.length; i++) {
+                                var p = PRODUCTS[i];
+                                var pName = (p.t || '').replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+                                if (pName === pid) {
+                                    p.p = fixPrice(prices[pid]);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    buildBrandChips();
+                    filterProducts();
+                    // Direct product link via hash
+                    var hash = window.location.hash;
+                    if (hash && hash.startsWith('#product=')) {
+                        var albumId = hash.replace('#product=', '');
+                        var idx = findProductByAlbumId(albumId);
+                        if (idx >= 0) openLightbox(idx);
+                    }
+                });
             })
             .catch(e => {
                 document.getElementById('grid').innerHTML = '<div class="no-results" style="display:block">שגיאה בטעינת המוצרים</div>';

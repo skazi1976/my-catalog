@@ -1236,7 +1236,10 @@ function renderProducts(filter) {
         REAL_PRODUCTS;
 
     document.getElementById('productCount').textContent = filtered.length;
-    tbody.innerHTML = filtered.map(p => `
+    tbody.innerHTML = filtered.map((p, i) => {
+        const pid = p.productId || p.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+        const priceDisplay = p.price || '<span style="color:#ff5252">ללא מחיר</span>';
+        return `
         <tr>
             <td>
                 <div class="prod-name">
@@ -1244,12 +1247,60 @@ function renderProducts(filter) {
                     ${p.name}
                 </div>
             </td>
-            <td style="color:#00e676;font-weight:bold;">${p.price}</td>
+            <td>
+                <span id="price-display-${i}" style="color:#00e676;font-weight:bold;">${priceDisplay}</span>
+                <span id="price-edit-${i}" style="display:none;">
+                    <input type="number" step="0.01" id="price-input-${i}" style="width:70px;padding:4px 8px;border-radius:6px;border:1px solid #3a4a5a;background:#0f1923;color:#fff;font-size:14px;" placeholder="$" />
+                    <button onclick="savePrice(${i},'${pid.replace(/'/g, '')}')" style="padding:4px 10px;border:none;border-radius:6px;background:#00e676;color:#0f1923;font-weight:bold;cursor:pointer;font-size:12px;">💾</button>
+                    <button onclick="cancelEditPrice(${i})" style="padding:4px 8px;border:none;border-radius:6px;background:#ff5252;color:#fff;cursor:pointer;font-size:12px;">✕</button>
+                </span>
+                <button id="price-btn-${i}" onclick="editPrice(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;margin-right:4px;" title="עריכת מחיר">✏️</button>
+            </td>
             <td>👁️ ${p.views}</td>
             <td>🖱️ ${p.clicks}</td>
             <td>💬 ${p.msgs}</td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
+}
+
+function editPrice(i) {
+    document.getElementById('price-display-' + i).style.display = 'none';
+    document.getElementById('price-btn-' + i).style.display = 'none';
+    document.getElementById('price-edit-' + i).style.display = '';
+    document.getElementById('price-input-' + i).focus();
+}
+
+function cancelEditPrice(i) {
+    document.getElementById('price-display-' + i).style.display = '';
+    document.getElementById('price-btn-' + i).style.display = '';
+    document.getElementById('price-edit-' + i).style.display = 'none';
+}
+
+async function savePrice(i, productId) {
+    const input = document.getElementById('price-input-' + i);
+    const price = input.value.trim();
+    if (!price || isNaN(price)) { alert('הזינו מחיר תקין'); return; }
+
+    const store = localStorage.getItem('sellerStore');
+    const token = localStorage.getItem('sellerToken');
+    try {
+        const resp = await fetch(API_BASE + '/seller/update-price', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Seller-Token': token },
+            body: JSON.stringify({ store, productId, price: '$' + price })
+        });
+        const result = await resp.json();
+        if (result.success) {
+            document.getElementById('price-display-' + i).innerHTML = '<span style="color:#00e676;font-weight:bold;">$' + price + '</span>';
+            cancelEditPrice(i);
+            // Update local data
+            if (REAL_PRODUCTS[i]) REAL_PRODUCTS[i].price = '$' + price;
+        } else {
+            alert(result.error || 'שגיאה בשמירה');
+        }
+    } catch (e) {
+        alert('שגיאה: ' + e.message);
+    }
 }
 
 function filterProducts(val) {
