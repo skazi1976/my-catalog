@@ -1344,14 +1344,23 @@
         let currentBrand = '';
 
         // Fix price display: ensure ₪ symbol is correct
+        var USD_TO_ILS = 3.63;
         function fixPrice(p) {
             if (!p) return p;
             // Fix corrupted shekel: ג‚× (charCodes 1490,8218,215) → ₪
             p = p.replace(/\u05D2\u201A\u00D7/g, '₪');
-            // Add ₪ to raw numbers from FlyLink (e.g. "38.99" → "₪38.99")
-            if (/^\d+(\.\d+)?$/.test(p)) p = '₪' + p;
-            // Fix dollar display: "36.99$" → "$36.99"
-            if (/^\d+(\.\d+)?\$$/.test(p)) p = '$' + p.replace('$','');
+            // Convert dollar prices to ILS: "68.64$" or "$68.64" → "₪249"
+            var dollarMatch = p.match(/^\$?(\d+\.?\d*)\$?$/);
+            if (dollarMatch && p.includes('$')) {
+                var ils = Math.round(parseFloat(dollarMatch[1]) * USD_TO_ILS);
+                return '₪' + ils;
+            }
+            // Raw number without symbol → convert USD to ILS
+            if (/^\d+(\.\d+)?$/.test(p)) {
+                var val = parseFloat(p);
+                if (val < 500) { return '₪' + Math.round(val * USD_TO_ILS); }
+                return '₪' + Math.round(val);
+            }
             return p;
         }
 
