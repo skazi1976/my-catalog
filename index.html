@@ -1894,18 +1894,20 @@
                 btnTop.onclick = btn.onclick;
                 const couponEl = document.getElementById('lbCouponTop');
                 const couponCode = document.getElementById('lbCouponCodeTop');
-                if (isFlyLink) {
+                var isXuxuStore = (store === 'xuxuxuxux');
+                var storeCoupon = product.coupon || (isXuxuStore ? 'SKAZI666' : '');
+                if (isFlyLink || isXuxuStore) {
                     btn.textContent = '🛒 קנו עכשיו';
                     btnTop.textContent = '🛒 קנו עכשיו';
                     appBtn.style.display = 'none';
                     step1.textContent = 'לחצו על הכפתור למטה כדי לעבור לעמוד המוצר ב-FLYLINK';
                     step5.textContent = 'לשאלות — שלחו הודעה למוכר ישירות דרך הצ׳אט ב-FLYLINK';
-                    // Show coupon if product has one
-                    if (product.coupon) {
+                    // Show coupon for xuxuxuxux store (FlyLink + cyborg77)
+                    if (storeCoupon) {
                         if(couponEl) couponEl.style.display = 'block';
-                        couponCode.textContent = product.coupon;
+                        couponCode.textContent = storeCoupon;
                         couponTop.style.display = 'block';
-                        couponCodeTop.textContent = product.coupon;
+                        couponCodeTop.textContent = storeCoupon;
                     } else {
                         if(couponEl) couponEl.style.display = 'none';
                         couponTop.style.display = 'none';
@@ -2438,6 +2440,8 @@ function getStore(product) {
     if (!product.i || !product.i[0]) return '';
     // xuxuxuxux products have images like r2.dev/xuxu/xxx.jpg
     if (product.i[0].includes('/xuxu/')) return 'xuxuxuxux';
+    // cyborg77 products = same seller as xuxuxuxux
+    if (product.i[0].includes('cyborg77') || (product.l && product.l.includes('yupoo.com'))) return 'xuxuxuxux';
     var m = product.i[0].match(/images\/(\d+)\//);
     if (!m) return '';
     var code = STORE_MAP[m[1]] || '';
