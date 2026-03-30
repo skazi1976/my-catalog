@@ -769,6 +769,42 @@ async function loadProducts() {
     } catch(e) { console.error('Load error:', e); }
 }
 
+async function publishToDeals(product) {
+    try {
+        // 1. Get current deals posts
+        const getResp = await fetch('https://ali-findme-api.ohadf1976.workers.dev/deals/posts');
+        const currentPosts = await getResp.json();
+
+        // 2. Build new deal post
+        const today = new Date().toISOString().slice(0, 10);
+        const slug = Math.random().toString(36).slice(2, 8);
+        const newPost = {
+            id: `${today}-${slug}`,
+            date: today,
+            type: 'daily',
+            brand: '',
+            title: product.title,
+            price: product.price,
+            link: product.link,
+            images: product.images || [product.img]
+        };
+
+        // 3. Add to beginning of list (newest first), keep last 30
+        const updatedPosts = [newPost, ...currentPosts].slice(0, 30);
+
+        // 4. Save back
+        await fetch('https://ali-findme-api.ohadf1976.workers.dev/deals/posts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: 'deals2026', posts: updatedPosts })
+        });
+
+        console.log('✅ Published to deals page:', newPost.id);
+    } catch(e) {
+        console.error('publishToDeals error:', e);
+    }
+}
+
 async function saveProducts() {
     try {
         await fetch('https://ali-findme-api.ohadf1976.workers.dev/gallery/products', {
@@ -1222,8 +1258,12 @@ async function adminUploadMultiple() {
     renderProducts();
     try {
         await saveProducts();
+
+        // Auto-publish to alifindme.com/deals/
+        await publishToDeals(product);
+
         statusEl.className = 'admin-status success';
-        statusEl.textContent = `✅ "${title}" נוסף עם ${files.length} תמונות!`;
+        statusEl.textContent = `✅ "${title}" נוסף ופורסם לדף הדילים!`;
     } catch(e) {
         statusEl.className = 'admin-status error';
         statusEl.textContent = '❌ המוצר נוסף אבל שמירה נכשלה: ' + e.message;
