@@ -206,6 +206,27 @@
         <div class="stat-card"><div class="stat-number" id="statInstalls" style="color:#FF6B00">-</div><div class="stat-label">⬇️ התקנות PWA</div></div>
       </div>
 
+      <!-- Contest Section -->
+      <div class="admin-card" style="border-right:4px solid #FFD700;margin-bottom:20px;">
+        <h2>🏆 תחרות שיתופים</h2>
+        <div style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
+          <div style="flex:1;min-width:100px;background:var(--bg);border-radius:12px;padding:15px;text-align:center;">
+            <div style="font-size:28px;font-weight:bold;color:#FFD700;" id="contestShares">0</div>
+            <div style="color:var(--text-light);font-size:12px;">סה"כ שיתופים</div>
+          </div>
+          <div style="flex:1;min-width:100px;background:var(--bg);border-radius:12px;padding:15px;text-align:center;">
+            <div style="font-size:28px;font-weight:bold;color:#00B894;" id="contestUsers">0</div>
+            <div style="color:var(--text-light);font-size:12px;">משתתפים</div>
+          </div>
+          <div style="flex:1;min-width:100px;background:var(--bg);border-radius:12px;padding:15px;text-align:center;">
+            <div style="font-size:28px;font-weight:bold;color:#D63031;" id="contestDays">—</div>
+            <div style="color:var(--text-light);font-size:12px;">ימים נותרו</div>
+          </div>
+        </div>
+        <h3 style="margin-bottom:8px;">🥇 טבלת מובילים</h3>
+        <div id="contestBoard" style="max-height:250px;overflow-y:auto;">טוען...</div>
+      </div>
+
       <!-- Search Logs Tab -->
       <div class="tab-panel active" id="tab-searches">
         <div class="admin-card">
@@ -436,6 +457,27 @@ async function loadData() {
     // Daily stats
     const analytics = await apiGet('/admin/analytics');
     if (analytics) renderDailyCharts(analytics.dailyStats);
+
+    // Contest leaderboard
+    try {
+      const contestResp = await fetch('https://ali-findme-api.ohadf1976.workers.dev/contest/leaderboard');
+      const contestData = await contestResp.json();
+      const lb = contestData.leaderboard || [];
+      const totalShares = lb.reduce((s, u) => s + u.shares, 0);
+      document.getElementById('contestShares').textContent = totalShares;
+      document.getElementById('contestUsers').textContent = lb.length;
+      const days = Math.max(0, Math.floor((new Date('2026-04-15T23:59:59') - new Date()) / 86400000));
+      document.getElementById('contestDays').textContent = days;
+      const medals = ['🥇', '🥈', '🥉'];
+      document.getElementById('contestBoard').innerHTML = lb.length === 0 ?
+        '<div style="text-align:center;color:var(--text-light);padding:15px;">אין משתתפים עדיין</div>' :
+        lb.slice(0, 10).map((u, i) =>
+          '<div style="display:flex;align-items:center;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:var(--bg);">' +
+          '<span style="font-size:18px;width:30px;text-align:center;">' + (medals[i] || (i+1)) + '</span>' +
+          '<span style="flex:1;margin:0 8px;">' + (u.name || 'אנונימי') + '</span>' +
+          '<span style="color:#FFD700;font-weight:bold;">' + u.shares + ' שיתופים</span></div>'
+        ).join('');
+    } catch(e) {}
 
   } catch (e) {
     console.error('Load error:', e);
