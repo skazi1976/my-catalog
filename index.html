@@ -2422,7 +2422,7 @@
             var CATALOG_URL = 'https://hacatalog.com';
 
             // Get or create user ID
-            function getContestUser() {
+            window.getContestUser = function() {
                 var id = localStorage.getItem('contest_id');
                 if (!id) {
                     id = 'u' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -2466,7 +2466,7 @@
                     '<h3 style="color:#00d4aa;margin:0 0 10px;">!ברוכים הבאים לתחרות</h3>' +
                     '<p style="color:#aaa;font-size:14px;margin-bottom:15px;">שתפו את הקטלוג עם חברים וזכו בפרסים!<br>ככל ששיתפתם יותר - הסיכוי גדל</p>' +
                     '<input id="contestNameInput" type="text" placeholder="השם שלך (לטבלת המובילים)" style="width:100%;padding:12px;border-radius:10px;border:2px solid #2a3a4a;background:#0a0a0f;color:#fff;font-size:16px;text-align:center;margin-bottom:12px;box-sizing:border-box;">' +
-                    '<button onclick="var n=document.getElementById(\'contestNameInput\').value.trim();if(n){localStorage.setItem(\'contest_name\',n);fetch(\'' + CONTEST_API + '/contest/share\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({userId:getContestUser?getContestUser():\'\',name:n})}).catch(function(){});}this.closest(\'div\').parentElement.remove();" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#00d4aa,#00c853);color:#0f1923;font-size:16px;font-weight:bold;cursor:pointer;">🚀 בואו נתחיל!</button>' +
+                    '<button onclick="var n=document.getElementById(\'contestNameInput\').value.trim();if(n){localStorage.setItem(\'contest_name\',n);fetch(\'' + CONTEST_API + '/contest/share\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({userId:window.getContestUser(),name:n})}).catch(function(){});}this.closest(\'.contest-panel\').remove();" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#00d4aa,#00c853);color:#0f1923;font-size:16px;font-weight:bold;cursor:pointer;">🚀 בואו נתחיל!</button>' +
                     '</div>';
                 div.addEventListener('click', function(e) { if (e.target === div) div.remove(); });
                 document.body.appendChild(div);
