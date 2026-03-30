@@ -7,6 +7,17 @@
     <meta name="description" content="קטלוג 2707 פריטים ממותגים נחשבים במחירי רצפה - Nike, Adidas, Jordan, Louis Vuitton, Dior ועוד. נעליים, בגדים ואקססוריז עם משלוח ישיר וקישורי רכישה.">
     <link rel="canonical" href="https://skazi1976.github.io/my-catalog/">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+    <!-- Meta Pixel -->
+    <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1478791197072420');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1478791197072420&ev=PageView&noscript=1"/></noscript>
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0f">
@@ -1657,9 +1668,15 @@
 
         let filteredIndices = [];
 
+        var _fbqSearchTimer;
         function filterProducts() {
             if (!PRODUCTS.length) return;
             const query = document.getElementById('searchBox').value.toLowerCase().trim();
+            // Meta Pixel: Search (debounced)
+            if (query && query.length >= 2 && typeof fbq === 'function') {
+                clearTimeout(_fbqSearchTimer);
+                _fbqSearchTimer = setTimeout(function() { fbq('track', 'Search', {search_string: query}); }, 1500);
+            }
 
             // Resolve Hebrew/abbreviation aliases
             const resolved = query ? resolveSearchQuery(query) : null;
@@ -1838,6 +1855,8 @@
             const title = product.t;
             const link = product.l;
             const hasAffiliate = product.a;
+            // Meta Pixel: ViewContent
+            if (typeof fbq === 'function') fbq('track', 'ViewContent', {content_name: title, content_type: 'product', value: product.p ? parseFloat(product.p.replace(/[^0-9.]/g,'')) : 0, currency: 'ILS'});
             // Track product view
             var store = getStore(product);
             if (store) {
