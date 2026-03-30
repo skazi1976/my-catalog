@@ -2415,6 +2415,164 @@
             }
         })();
 
+        // === Share Contest System ===
+        (function() {
+            var CONTEST_API = 'https://ali-findme-api.ohadf1976.workers.dev';
+            var CONTEST_END = '2026-04-15T23:59:59';
+            var CATALOG_URL = 'https://hacatalog.com';
+
+            // Get or create user ID
+            function getContestUser() {
+                var id = localStorage.getItem('contest_id');
+                if (!id) {
+                    id = 'u' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                    localStorage.setItem('contest_id', id);
+                }
+                return id;
+            }
+
+            // Track share
+            window.contestShare = function(platform) {
+                var userId = getContestUser();
+                var name = localStorage.getItem('contest_name') || '';
+                fetch(CONTEST_API + '/contest/share', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({userId: userId, platform: platform, name: name})
+                }).then(function(r) { return r.json(); }).then(function(d) {
+                    if (d.shares) {
+                        updateContestBadge(d.shares);
+                        if (d.shares === 1) showContestWelcome();
+                    }
+                }).catch(function(){});
+            };
+
+            // Update badge with share count
+            function updateContestBadge(shares) {
+                var badge = document.getElementById('contestBadge');
+                if (badge) badge.textContent = shares;
+                var score = document.getElementById('contestScore');
+                if (score) score.textContent = shares;
+            }
+
+            // Contest welcome after first share
+            function showContestWelcome() {
+                var name = localStorage.getItem('contest_name');
+                if (name) return;
+                var div = document.createElement('div');
+                div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;';
+                div.innerHTML = '<div style="background:linear-gradient(135deg,#1a2a3a,#0f1923);border-radius:20px;padding:30px;max-width:350px;text-align:center;color:#fff;border:2px solid #00d4aa;">' +
+                    '<div style="font-size:50px;margin-bottom:10px;">🏆</div>' +
+                    '<h3 style="color:#00d4aa;margin:0 0 10px;">!ברוכים הבאים לתחרות</h3>' +
+                    '<p style="color:#aaa;font-size:14px;margin-bottom:15px;">שתפו את הקטלוג עם חברים וזכו בפרסים!<br>ככל ששיתפתם יותר - הסיכוי גדל</p>' +
+                    '<input id="contestNameInput" type="text" placeholder="השם שלך (לטבלת המובילים)" style="width:100%;padding:12px;border-radius:10px;border:2px solid #2a3a4a;background:#0a0a0f;color:#fff;font-size:16px;text-align:center;margin-bottom:12px;box-sizing:border-box;">' +
+                    '<button onclick="var n=document.getElementById(\'contestNameInput\').value.trim();if(n){localStorage.setItem(\'contest_name\',n);fetch(\'' + CONTEST_API + '/contest/share\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({userId:getContestUser?getContestUser():\'\',name:n})}).catch(function(){});}this.closest(\'div\').parentElement.remove();" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#00d4aa,#00c853);color:#0f1923;font-size:16px;font-weight:bold;cursor:pointer;">🚀 בואו נתחיל!</button>' +
+                    '</div>';
+                div.addEventListener('click', function(e) { if (e.target === div) div.remove(); });
+                document.body.appendChild(div);
+            }
+
+            // Contest floating button
+            var contestBtn = document.createElement('button');
+            contestBtn.id = 'contestFloatBtn';
+            contestBtn.style.cssText = 'position:fixed;bottom:80px;left:20px;z-index:9990;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border:none;border-radius:50px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(255,215,0,0.4);display:flex;align-items:center;gap:6px;animation:contestPulse 2s infinite;';
+            contestBtn.innerHTML = '🏆 תחרות <span id="contestBadge" style="background:#ff3b3b;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;">0</span>';
+            contestBtn.onclick = function() { showContestPanel(); };
+            document.body.appendChild(contestBtn);
+
+            // Add pulse animation
+            var style = document.createElement('style');
+            style.textContent = '@keyframes contestPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}' +
+                '.contest-panel{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;}' +
+                '.contest-box{background:linear-gradient(135deg,#1a2a3a,#0f1923);border-radius:20px;padding:25px;max-width:400px;width:90%;color:#fff;border:2px solid #FFD700;max-height:80vh;overflow-y:auto;}' +
+                '.contest-row{display:flex;align-items:center;padding:10px 12px;border-radius:10px;margin-bottom:6px;background:#0a1520;}' +
+                '.contest-rank{font-size:20px;width:35px;text-align:center;}' +
+                '.contest-name{flex:1;font-size:15px;margin:0 10px;}' +
+                '.contest-shares{color:#FFD700;font-weight:bold;font-size:16px;}' +
+                '.contest-share-btns{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;}' +
+                '.contest-share-btns button{flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;}';
+            document.head.appendChild(style);
+
+            // Contest panel
+            window.showContestPanel = function() {
+                var timeLeft = getTimeLeft();
+                var div = document.createElement('div');
+                div.className = 'contest-panel';
+                div.innerHTML = '<div class="contest-box">' +
+                    '<div style="text-align:center;margin-bottom:15px;">' +
+                    '<div style="font-size:40px;">🏆</div>' +
+                    '<h2 style="color:#FFD700;margin:5px 0;">תחרות השיתופים</h2>' +
+                    '<p style="color:#aaa;font-size:13px;margin:0;">שתפו את הקטלוג וזכו בפרס!</p>' +
+                    '<div style="margin-top:10px;padding:8px 15px;background:#1a1a2e;border-radius:10px;display:inline-block;">' +
+                    '<span style="color:#ff6b6b;">⏰ ' + timeLeft + '</span></div>' +
+                    '</div>' +
+                    '<div style="text-align:center;padding:12px;background:linear-gradient(135deg,#0a1520,#1a2a3a);border-radius:12px;margin-bottom:15px;">' +
+                    '<div style="color:#aaa;font-size:12px;">השיתופים שלך</div>' +
+                    '<div id="contestScore" style="font-size:36px;font-weight:bold;color:#FFD700;">0</div>' +
+                    '</div>' +
+                    '<h3 style="color:#FFD700;text-align:center;margin-bottom:10px;">🥇 טבלת מובילים</h3>' +
+                    '<div id="contestLeaderboard"><div style="text-align:center;color:#aaa;padding:20px;">טוען...</div></div>' +
+                    '<div class="contest-share-btns">' +
+                    '<button onclick="shareContest(\'whatsapp\')" style="background:#25D366;color:#fff;">💬 וואצאפ</button>' +
+                    '<button onclick="shareContest(\'telegram\')" style="background:#0088cc;color:#fff;">📨 טלגרם</button>' +
+                    '<button onclick="shareContest(\'copy\')" style="background:#555;color:#fff;">📋 העתק</button>' +
+                    '</div>' +
+                    '<button onclick="this.closest(\'.contest-panel\').remove()" style="width:100%;margin-top:10px;padding:10px;border:none;border-radius:10px;background:#2a3a4a;color:#aaa;cursor:pointer;">סגור</button>' +
+                    '</div>';
+                div.addEventListener('click', function(e) { if (e.target === div) div.remove(); });
+                document.body.appendChild(div);
+                loadLeaderboard();
+                loadMyScore();
+            };
+
+            function getTimeLeft() {
+                var end = new Date(CONTEST_END);
+                var now = new Date();
+                var diff = end - now;
+                if (diff <= 0) return 'התחרות הסתיימה!';
+                var days = Math.floor(diff / 86400000);
+                var hours = Math.floor((diff % 86400000) / 3600000);
+                return days + ' ימים ' + hours + ' שעות';
+            }
+
+            function loadLeaderboard() {
+                fetch(CONTEST_API + '/contest/leaderboard').then(function(r) { return r.json(); }).then(function(d) {
+                    var el = document.getElementById('contestLeaderboard');
+                    if (!el || !d.leaderboard) return;
+                    var medals = ['🥇', '🥈', '🥉'];
+                    el.innerHTML = d.leaderboard.length === 0 ? '<div style="text-align:center;color:#aaa;padding:15px;">אין משתתפים עדיין - תהיו הראשונים! 🚀</div>' :
+                        d.leaderboard.map(function(u, i) {
+                            return '<div class="contest-row">' +
+                                '<div class="contest-rank">' + (medals[i] || (i + 1)) + '</div>' +
+                                '<div class="contest-name">' + (u.name || 'אנונימי') + '</div>' +
+                                '<div class="contest-shares">' + u.shares + ' שיתופים</div></div>';
+                        }).join('');
+                }).catch(function(){});
+            }
+
+            function loadMyScore() {
+                var userId = getContestUser();
+                fetch(CONTEST_API + '/contest/score?id=' + userId).then(function(r) { return r.json(); }).then(function(d) {
+                    updateContestBadge(d.shares || 0);
+                }).catch(function(){});
+            }
+
+            window.shareContest = function(platform) {
+                var msg = '🔥 קטלוג מותגים נחשבים במחירי רצפה!\n\n👟 Nike, Adidas, Jordan, LV, Dior ועוד\n💰 מחירים הכי זולים\n🚚 משלוח ישיר\n\n' + CATALOG_URL;
+                if (platform === 'whatsapp') {
+                    window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+                } else if (platform === 'telegram') {
+                    window.open('https://t.me/share/url?url=' + encodeURIComponent(CATALOG_URL) + '&text=' + encodeURIComponent(msg), '_blank');
+                } else if (platform === 'copy') {
+                    navigator.clipboard.writeText(CATALOG_URL).then(function() { alert('הקישור הועתק! 📋'); });
+                }
+                contestShare(platform);
+            };
+
+            // Load initial score
+            setTimeout(loadMyScore, 3000);
+        })();
+
         // === Analytics Tracking ===
         (function() {
             var TRACK_URL = 'https://catalog-analytics.ohadf1976.workers.dev/track';
