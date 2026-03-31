@@ -1752,7 +1752,7 @@
                 const priceHtml = p.p ? '<div class="price">' + p.p + '</div>' : '';
                 const safeTitle = (p.t || '').replace(/<[^>]*>/g, '').trim();
                 const buyBtn = '<div class="buy-btn" onclick="openLightbox(' + pi + ')">👁 צפו בפריט</div>';
-                html += '<div class="product-card visible" style="animation-delay:' + Math.min(ci * 0.03, 0.6) + 's">' +
+                html += '<div class="product-card visible" data-pi="' + pi + '" style="animation-delay:' + Math.min(ci * 0.03, 0.6) + 's">' +
                     '<div class="card-gallery" onclick="openLightbox(' + pi + ')" style="cursor:pointer">' +
                     gallery + nav +
                     '<div class="img-count">' + imgs.length + ' 📷</div>' +
@@ -2675,12 +2675,13 @@ function getStore(product) {
 
 // Add chat buttons to products
 function addChatButtons() {
-    document.querySelectorAll('.product-card').forEach(function(card, i) {
+    document.querySelectorAll('.product-card').forEach(function(card) {
         if (card.querySelector('.chat-seller-btn')) return;
         var info = card.querySelector('.card-info');
-        if (!info || !PRODUCTS[i]) return;
+        var pi = parseInt(card.dataset.pi);
+        if (!info || isNaN(pi) || !PRODUCTS[pi]) return;
 
-        var store = getStore(PRODUCTS[i]);
+        var store = getStore(PRODUCTS[pi]);
         if (!store) return;
 
         var btn = document.createElement('button');
