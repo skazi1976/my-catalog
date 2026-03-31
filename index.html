@@ -2675,7 +2675,6 @@ function getStore(product) {
 
 // Add chat buttons to products
 function addChatButtons() {
-    if (!Object.keys(STORE_MAP).length) return;
     document.querySelectorAll('.product-card').forEach(function(card, i) {
         if (card.querySelector('.chat-seller-btn')) return;
         var info = card.querySelector('.card-info');
