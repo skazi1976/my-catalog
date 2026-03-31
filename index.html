@@ -1742,10 +1742,10 @@
                 let gallery = '';
                 // Only first image loads immediately, rest load on interaction
                 if (imgs.length > 0) {
-                    gallery += '<img src="' + imgs[0] + '" class="gallery-img active" data-idx="0" alt="product" loading="lazy" decoding="async">';
+                    gallery += '<img src="' + imgs[0] + '" class="gallery-img active" data-idx="0" alt="product" loading="lazy" decoding="async" onload="if(this.naturalWidth<=75&&this.naturalHeight<=75)this.style.display=\'none\'">';
                 }
                 for (let idx = 1; idx < imgs.length; idx++) {
-                    gallery += '<img data-src="' + imgs[idx] + '" class="gallery-img" data-idx="' + idx + '" alt="product">';
+                    gallery += '<img data-src="' + imgs[idx] + '" class="gallery-img" data-idx="' + idx + '" alt="product" onload="if(this.naturalWidth<=75&&this.naturalHeight<=75)this.style.display=\'none\'">';
                 }
                 const nav = imgs.length > 1 ? '<div class="gallery-nav"><button class="prev" onclick="event.stopPropagation();prevImg(this)">‹</button><button class="next" onclick="event.stopPropagation();nextImg(this)">›</button></div>' : '';
                 const badge = hasAff ? '<span class="badge badge-aff">✓ קישור</span>' : '';
@@ -1867,7 +1867,7 @@
                 }).catch(function(){});
             }
             
-            lbImages = images;
+            lbImages = images.filter(function(src) { return true; }); // all images, small filtered in onload
             lbIndex = 0;
             
             document.getElementById('lbTitle').textContent = title;
@@ -1959,7 +1959,7 @@
             images.forEach((img, i) => {
                 const dot = document.createElement('div');
                 dot.className = 'lb-dot' + (i === 0 ? ' active' : '');
-                dot.innerHTML = '<img src="' + img + '" alt="">';
+                dot.innerHTML = '<img src="' + img + '" alt="" onload="if(this.naturalWidth<=75&&this.naturalHeight<=75)this.parentElement.style.display=\'none\'">';
                 dot.onclick = () => lbGoTo(i);
                 dotsContainer.appendChild(dot);
             });
@@ -1990,7 +1990,17 @@
         
         function lbGoTo(idx) {
             lbIndex = idx;
-            document.getElementById('lbImage').src = lbImages[idx];
+            var img = document.getElementById('lbImage');
+            img.src = lbImages[idx];
+            img.onload = function() {
+                if (this.naturalWidth <= 75 && this.naturalHeight <= 75) {
+                    // Skip tiny image, go to next
+                    if (lbImages.length > 1) {
+                        var next = (idx + 1) % lbImages.length;
+                        if (next !== idx) lbGoTo(next);
+                    }
+                }
+            };
             document.getElementById('lbCounter').textContent = (idx + 1) + ' / ' + lbImages.length;
             
             document.querySelectorAll('.lb-dot').forEach((d, i) => {
