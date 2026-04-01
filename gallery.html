@@ -1326,7 +1326,9 @@ loadProducts().then(() => {
                         <div id="spThumbs" style="display:flex;gap:6px;overflow-x:auto;padding:10px 0;"></div>
                     ` : ''}
                     <div class="card-info">
+                        ${p.brand ? `<div style="color:#FF6B00;font-family:'Heebo',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">${p.brand}</div>` : ''}
                         <div class="card-title" style="font-size:18px;-webkit-line-clamp:unset;">${p.title}</div>
+                        ${p.zaraPrice ? `<div style="color:#888;font-size:13px;margin-bottom:2px;"><s>₪${p.zaraPrice}</s> מחיר מקורי</div>` : ''}
                         <div class="card-price" style="font-size:24px;">₪${p.price} <span>כולל משלוח</span></div>
                         ${p.description ? `<div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.7;margin:12px 0;padding:12px;background:rgba(255,255,255,0.04);border-radius:10px;direction:rtl;white-space:pre-line;">${p.description.replace(/</g,'&lt;')}</div>` : ''}
                         <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.href)}" target="_blank" class="wa-share-btn">💬 שתפו לחברה</a>
