@@ -1907,7 +1907,7 @@
             const btnTop = document.getElementById('lbBuyBtnTop');
             const couponTop = document.getElementById('lbCouponTop');
             const couponCodeTop = document.getElementById('lbCouponCodeTop');
-            if (hasAffiliate) {
+            if (hasAffiliate || link) {
                 btnTop.href = link;
                 btnTop.style.display = '';
                 btnTop.onclick = btn.onclick;
