@@ -790,7 +790,7 @@ async function publishToDeals(product) {
         };
 
         // 3. Add to beginning of list (newest first), keep last 30
-        const updatedPosts = [newPost, ...currentPosts].slice(0, 30);
+        const updatedPosts = [newPost, ...currentPosts].slice(0, 100);
 
         // 4. Save back
         await fetch('https://ali-findme-api.ohadf1976.workers.dev/deals/posts', {
@@ -1005,6 +1005,8 @@ function editProduct(index) {
             <input id="editLink" value="${p.link || ''}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;direction:ltr;">
             <label style="color:#aaa;font-size:13px;">מחיר Zara מקורי (₪)</label>
             <input id="editZaraPrice" type="number" value="${p.zaraPrice || ''}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;">
+            <label style="color:#aaa;font-size:13px;">📝 תיאור מוצר</label>
+            <textarea id="editDescription" rows="4" placeholder="תיאור מפורט של המוצר, מידות, צבעים..." style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:14px;resize:vertical;direction:rtl;line-height:1.6;">${(p.description || '').replace(/</g,'&lt;')}</textarea>
             ${(p.images && p.images.length > 1) ? `
             <label style="color:#aaa;font-size:13px;">📸 בחרו תמונה ראשית (לחצו על תמונה)</label>
             <div id="editImgGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 16px;max-height:200px;overflow-y:auto;">
@@ -1039,11 +1041,13 @@ async function saveEdit(index) {
     const price = parseInt(document.getElementById('editPrice').value) || 0;
     const link = document.getElementById('editLink').value;
     const zaraPrice = parseInt(document.getElementById('editZaraPrice').value) || 0;
+    const description = document.getElementById('editDescription').value.trim();
 
     PRODUCTS[index].title = title;
     PRODUCTS[index].price = price;
     PRODUCTS[index].link = link;
     if (zaraPrice) PRODUCTS[index].zaraPrice = zaraPrice;
+    if (description) PRODUCTS[index].description = description;
 
     try {
         await fetch('https://ali-findme-api.ohadf1976.workers.dev/gallery/products', {
