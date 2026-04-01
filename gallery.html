@@ -997,8 +997,10 @@ function editProduct(index) {
     overlay.innerHTML = `
         <div style="background:#1a1a2e;border-radius:16px;padding:24px;max-width:500px;width:100%;direction:rtl;max-height:90vh;overflow-y:auto;">
             <h3 style="color:#ff8c40;margin-bottom:16px;font-family:Heebo;">✏️ עריכת מוצר</h3>
+            <label style="color:#aaa;font-size:13px;">🏷️ שם מותג</label>
+            <input id="editBrand" value="${(p.brand || '').replace(/"/g,'&quot;')}" placeholder="למשל: ZARA, NIKE, GUCCI" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#FF6B00;border-radius:8px;font-size:15px;font-weight:700;text-transform:uppercase;">
             <label style="color:#aaa;font-size:13px;">שם המוצר</label>
-            <input id="editTitle" value="${p.title.replace(/"/g,'&quot;')}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;direction:ltr;">
+            <input id="editTitle" value="${p.title.replace(/"/g,'&quot;')}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;direction:rtl;">
             <label style="color:#aaa;font-size:13px;">מחיר (₪)</label>
             <input id="editPrice" type="number" value="${p.price}" style="width:100%;padding:10px;margin:6px 0 12px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:15px;">
             <label style="color:#aaa;font-size:13px;">קישור רכישה</label>
@@ -1037,12 +1039,14 @@ function selectMainImage(productIndex, imageIndex) {
 }
 
 async function saveEdit(index) {
+    const brand = document.getElementById('editBrand').value.trim();
     const title = document.getElementById('editTitle').value;
     const price = parseInt(document.getElementById('editPrice').value) || 0;
     const link = document.getElementById('editLink').value;
     const zaraPrice = parseInt(document.getElementById('editZaraPrice').value) || 0;
     const description = document.getElementById('editDescription').value.trim();
 
+    PRODUCTS[index].brand = brand;
     PRODUCTS[index].title = title;
     PRODUCTS[index].price = price;
     PRODUCTS[index].link = link;
