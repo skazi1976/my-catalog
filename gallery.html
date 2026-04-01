@@ -1328,6 +1328,7 @@ loadProducts().then(() => {
                     <div class="card-info">
                         <div class="card-title" style="font-size:18px;-webkit-line-clamp:unset;">${p.title}</div>
                         <div class="card-price" style="font-size:24px;">₪${p.price} <span>כולל משלוח</span></div>
+                        ${p.description ? `<div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.7;margin:12px 0;padding:12px;background:rgba(255,255,255,0.04);border-radius:10px;direction:rtl;white-space:pre-line;">${p.description.replace(/</g,'&lt;')}</div>` : ''}
                         <a href="https://wa.me/?text=${encodeURIComponent('👀 תראי מה מצאתי!\n' + p.title + ' - ₪' + p.price + '\n' + window.location.href)}" target="_blank" class="wa-share-btn">💬 שתפו לחברה</a>
                         <a href="${p.link}" target="_blank" rel="noopener" class="buy-btn" style="font-size:18px;padding:14px;">🛒 לרכישה</a>
                     </div>
