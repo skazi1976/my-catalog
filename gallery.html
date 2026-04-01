@@ -684,6 +684,10 @@
 <div class="admin-panel" id="adminPanel">
     <h2>🔧 ניהול מוצרים</h2>
     <div class="admin-field">
+        <label>🏷️ שם מותג</label>
+        <input type="text" id="adminBrand" placeholder="למשל: ZARA, NIKE, GUCCI" style="color:#FF6B00;font-weight:700;text-transform:uppercase;">
+    </div>
+    <div class="admin-field">
         <label>שם המוצר</label>
         <input type="text" id="adminTitle" placeholder="למשל: נעלי נייקי אייר מקס">
     </div>
@@ -692,8 +696,16 @@
         <input type="number" id="adminPrice" placeholder="99">
     </div>
     <div class="admin-field">
+        <label>מחיר מקורי (₪)</label>
+        <input type="number" id="adminZaraPrice" placeholder="239">
+    </div>
+    <div class="admin-field">
         <label>קישור רכישה (הדומיין יוחלף אוטומטית)</label>
         <input type="url" id="adminLink" placeholder="https://..." dir="ltr" oninput="autoReplaceDomain(this)">
+    </div>
+    <div class="admin-field">
+        <label>📝 תיאור מוצר</label>
+        <textarea id="adminDescription" rows="3" placeholder="תיאור מפורט, מידות, צבעים..." style="width:100%;padding:10px;background:#0f0f1a;border:1px solid #333;color:#fff;border-radius:8px;font-size:14px;resize:vertical;direction:rtl;"></textarea>
     </div>
     <div class="admin-field">
         <label>תמונות וסרטונים (בחירה מרובה)</label>
@@ -1182,9 +1194,12 @@ document.getElementById('adminImage').addEventListener('change', (e) => {
 });
 
 async function adminUploadMultiple() {
+    const brand = document.getElementById('adminBrand').value.trim();
     const title = document.getElementById('adminTitle').value.trim();
     const price = document.getElementById('adminPrice').value.trim();
+    const zaraPrice = document.getElementById('adminZaraPrice').value.trim();
     const link = document.getElementById('adminLink').value.trim();
+    const description = document.getElementById('adminDescription').value.trim();
     const fileInput = document.getElementById('adminImage');
     const statusEl = document.getElementById('adminStatus');
     const allFiles = Array.from(fileInput.files);
@@ -1256,9 +1271,12 @@ async function adminUploadMultiple() {
         img: uploadedMedia[0].url,
         images: uploadedMedia.map(m => m.url),
         isVideos: uploadedMedia.map(m => m.isVideo),
+        brand: brand,
         title: title,
         price: Number(price),
+        zaraPrice: zaraPrice ? Number(zaraPrice) : 0,
         link: link,
+        description: description,
         isVideo: uploadedMedia[0].isVideo
     };
 
@@ -1278,9 +1296,12 @@ async function adminUploadMultiple() {
     }
 
     // Clear form
+    document.getElementById('adminBrand').value = '';
     document.getElementById('adminTitle').value = '';
     document.getElementById('adminPrice').value = '';
+    document.getElementById('adminZaraPrice').value = '';
     document.getElementById('adminLink').value = '';
+    document.getElementById('adminDescription').value = '';
     fileInput.value = '';
     document.getElementById('adminPreviewGrid').innerHTML = '';
 }
