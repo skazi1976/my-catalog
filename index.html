@@ -1970,7 +1970,7 @@
             // Show/hide chat button based on store
             var store = getStore(product);
             var chatBtn = document.getElementById('lbChatBtn');
-            if (store === 'xuxuxuxux' || store === 'TOP-B111' || store === 'zad2025') {
+            if (store === 'xuxuxuxux' || store === 'TOP-B111' || store === 'zad2025' || store === 'ldan2025') {
                 chatBtn.style.display = '';
                 chatBtn.dataset.store = store;
                 chatBtn.dataset.title = (title || '').substring(0, 60);
@@ -2660,7 +2660,10 @@ function getStore(product) {
     if (product.l && product.l.includes('flylinking.com')) return 'xuxuxuxux';
     // ZAD products identified by title
     if (product.t && product.t.startsWith('ZAD')) return 'zad2025';
+    // LDAN products identified by title or image path
+    if (product.t && product.t.match(/^01-RX|^LDAN/)) return 'ldan2025';
     if (!product.i || !product.i[0]) return '';
+    if (product.i[0].includes('/ldan2025/')) return 'ldan2025';
     // xuxuxuxux products have images like r2.dev/xuxu/xxx.jpg
     if (product.i[0].includes('/xuxu/')) return 'xuxuxuxux';
     // cyborg77 products = same seller as xuxuxuxux
