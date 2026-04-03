@@ -1803,10 +1803,10 @@
         // === Direct Product Linking ===
         function getProductId(product, idx) {
             if (!product || !product.i || !product.i[0]) return idx !== undefined ? 'idx' + idx : '';
-            var m = product.i[0].match(/images\/(\d+)\//);
+            var m = product.i[0].match(/images\/(?:[^\/]+\/)?(\d+)\//);
             if (m) return m[1];
-            // FlyLink products: use xuxu hash or array index
-            var m2 = product.i[0].match(/xuxu\/([a-f0-9]+)_/);
+            // FlyLink products: use xuxu hash (with or without _ suffix)
+            var m2 = product.i[0].match(/xuxu(?:xuxux)?\/([a-f0-9]+)[_\.]/);
             if (m2) return 'x' + m2[1];
             return idx !== undefined ? 'idx' + idx : '';
         }
@@ -2405,8 +2405,9 @@
                     var pid = '';
                     var img = card.querySelector('.gallery-img');
                     if (img && img.src) {
-                        var m = img.src.match(/images\/(\d+)\//);
-                        if (m) pid = m[1];
+                        var m = img.src.match(/images\/(?:[^\/]+\/)?(\d+)\//);
+                        if (m) { pid = m[1]; }
+                        else { var m2 = img.src.match(/xuxu(?:xuxux)?\/([a-f0-9]+)[_\.]/); if (m2) pid = 'x' + m2[1]; }
                     }
                     var btn = document.createElement('button');
                     btn.className = 'wa-product-btn';
