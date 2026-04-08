@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>קטלוג מותגים נחשבים - נעליים, בגדים ואקססוריז במחירי רצפה</title>
     <meta name="description" content="קטלוג 4588 פריטים ממותגים נחשבים במחירי רצפה - Nike, Adidas, Jordan, Louis Vuitton, Dior ועוד. נעליים, בגדים ואקססוריז עם משלוח ישיר וקישורי רכישה.">
     <link rel="canonical" href="https://skazi1976.github.io/my-catalog/">
@@ -1973,7 +1970,7 @@
             // Show/hide chat button based on store
             var store = getStore(product);
             var chatBtn = document.getElementById('lbChatBtn');
-            if (store === 'xuxuxuxux' || store === 'TOP-B111' || store === 'zad2025' || store === 'ldan2025') {
+            if (store === 'xuxuxuxux' || store === 'zad2025' || store === 'ldan2025') {
                 chatBtn.style.display = '';
                 chatBtn.dataset.store = store;
                 chatBtn.dataset.title = (title || '').substring(0, 60);
@@ -2659,26 +2656,22 @@ fetch('stores.json').then(function(r){return r.json()}).then(function(d){STORE_M
 
 function getStore(product) {
     if (!product) return '';
+    // FlyLink products all belong to xuxuxuxux
+    if (product.l && product.l.includes('flylinking.com')) return 'xuxuxuxux';
     // ZAD products identified by title
     if (product.t && product.t.startsWith('ZAD')) return 'zad2025';
     // LDAN products identified by title or image path
     if (product.t && product.t.match(/^01-RX|^LDAN/)) return 'ldan2025';
     if (!product.i || !product.i[0]) return '';
     if (product.i[0].includes('/ldan2025/')) return 'ldan2025';
-    // TOP-B111 products have images like r2.dev/xuxu/xxx.jpg (NOT /xuxuxuxux/)
-    // Must check BEFORE flylinking because TOP-B111 also uses FlyLink links
-    if (product.i[0].includes('/xuxu/') && !product.i[0].includes('/xuxuxuxux/')) return 'TOP-B111';
-    // xuxuxuxux products have images like r2.dev/images/xuxuxuxux/xxx.jpg
-    if (product.i[0].includes('/xuxuxuxux/')) return 'xuxuxuxux';
-    // FlyLink products belong to xuxuxuxux (after TOP-B111 check)
-    if (product.l && product.l.includes('flylinking.com')) return 'xuxuxuxux';
+    // xuxuxuxux products have images like r2.dev/xuxu/xxx.jpg
+    if (product.i[0].includes('/xuxu/')) return 'xuxuxuxux';
     // cyborg77 products = same seller as xuxuxuxux
     if (product.i[0].includes('cyborg77') || (product.l && product.l.includes('yupoo.com'))) return 'xuxuxuxux';
     var m = product.i[0].match(/images\/(\d+)\//);
     if (!m) return '';
     var code = STORE_MAP[m[1]] || '';
     if (code === 'X') return 'xuxuxuxux';
-    if (code === 'T') return 'TOP-B111';
     if (code === 'Z') return 'zad2025';
     return '';
 }
