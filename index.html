@@ -2656,8 +2656,6 @@ fetch('stores.json').then(function(r){return r.json()}).then(function(d){STORE_M
 
 function getStore(product) {
     if (!product) return '';
-    // FlyLink products all belong to xuxuxuxux
-    if (product.l && product.l.includes('flylinking.com')) return 'xuxuxuxux';
     // ZAD products identified by title
     if (product.t && product.t.startsWith('ZAD')) return 'zad2025';
     // LDAN products identified by title or image path
@@ -2665,9 +2663,12 @@ function getStore(product) {
     if (!product.i || !product.i[0]) return '';
     if (product.i[0].includes('/ldan2025/')) return 'ldan2025';
     // TOP-B111 products have images like r2.dev/xuxu/xxx.jpg (NOT /xuxuxuxux/)
+    // Must check BEFORE flylinking because TOP-B111 also uses FlyLink links
     if (product.i[0].includes('/xuxu/') && !product.i[0].includes('/xuxuxuxux/')) return 'TOP-B111';
     // xuxuxuxux products have images like r2.dev/images/xuxuxuxux/xxx.jpg
     if (product.i[0].includes('/xuxuxuxux/')) return 'xuxuxuxux';
+    // FlyLink products belong to xuxuxuxux (after TOP-B111 check)
+    if (product.l && product.l.includes('flylinking.com')) return 'xuxuxuxux';
     // cyborg77 products = same seller as xuxuxuxux
     if (product.i[0].includes('cyborg77') || (product.l && product.l.includes('yupoo.com'))) return 'xuxuxuxux';
     var m = product.i[0].match(/images\/(\d+)\//);
