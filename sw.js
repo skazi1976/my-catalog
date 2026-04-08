@@ -1,5 +1,5 @@
 // Service Worker - Cache for offline & speed
-const CACHE_NAME = 'catalog-v4';
+const CACHE_NAME = 'catalog-v5';
 const PRECACHE = [
     './',
     './index.html',
