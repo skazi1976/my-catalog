@@ -2664,8 +2664,10 @@ function getStore(product) {
     if (product.t && product.t.match(/^01-RX|^LDAN/)) return 'ldan2025';
     if (!product.i || !product.i[0]) return '';
     if (product.i[0].includes('/ldan2025/')) return 'ldan2025';
-    // xuxuxuxux products have images like r2.dev/xuxu/xxx.jpg
-    if (product.i[0].includes('/xuxu/')) return 'xuxuxuxux';
+    // TOP-B111 products have images like r2.dev/xuxu/xxx.jpg (NOT /xuxuxuxux/)
+    if (product.i[0].includes('/xuxu/') && !product.i[0].includes('/xuxuxuxux/')) return 'TOP-B111';
+    // xuxuxuxux products have images like r2.dev/images/xuxuxuxux/xxx.jpg
+    if (product.i[0].includes('/xuxuxuxux/')) return 'xuxuxuxux';
     // cyborg77 products = same seller as xuxuxuxux
     if (product.i[0].includes('cyborg77') || (product.l && product.l.includes('yupoo.com'))) return 'xuxuxuxux';
     var m = product.i[0].match(/images\/(\d+)\//);
