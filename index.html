@@ -1970,7 +1970,7 @@
             // Show/hide chat button based on store
             var store = getStore(product);
             var chatBtn = document.getElementById('lbChatBtn');
-            if (store === 'xuxuxuxux' || store === 'zad2025' || store === 'ldan2025') {
+            if (store === 'xuxuxuxux' || store === 'TOP-B111' || store === 'zad2025' || store === 'ldan2025') {
                 chatBtn.style.display = '';
                 chatBtn.dataset.store = store;
                 chatBtn.dataset.title = (title || '').substring(0, 60);
@@ -2672,6 +2672,7 @@ function getStore(product) {
     if (!m) return '';
     var code = STORE_MAP[m[1]] || '';
     if (code === 'X') return 'xuxuxuxux';
+    if (code === 'T') return 'TOP-B111';
     if (code === 'Z') return 'zad2025';
     return '';
 }
