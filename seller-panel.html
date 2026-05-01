@@ -1528,16 +1528,25 @@ async function initDashboard() {
 </script>
 
 
-  <!-- AE_COOKIE_WARM_V1 -->
+  <!-- AE_COOKIE_WARM_V2_PLUS — high-intent shoppers, 6 trigger points -->
   <div id="aeWarmCk" style="position:fixed;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;left:-9999px;top:-9999px" aria-hidden="true"></div>
   <script>
   (function() {
     var WARM_URL = 'https://s.click.aliexpress.com/e/_c4kBQ3qf';
     var c = document.getElementById('aeWarmCk');
     if (!c) return;
-    var done = false;
-    function plant() {
-      if (done) return; done = true;
+
+    var planted = 0;
+    var lastPlantTime = 0;
+    var MAX_PLANTS = 10;          // hard cap (avoid abuse)
+    var MIN_GAP_MS = 5000;        // min 5s between plants
+
+    function plant(method) {
+      var now = Date.now();
+      if (planted >= MAX_PLANTS) return;
+      if (now - lastPlantTime < MIN_GAP_MS) return;
+      lastPlantTime = now;
+      planted++;
       try {
         var ifr = document.createElement('iframe');
         ifr.src = WARM_URL;
@@ -1547,18 +1556,70 @@ async function initDashboard() {
         c.appendChild(ifr);
         var img = new Image();
         img.referrerPolicy = 'no-referrer-when-downgrade';
-        img.src = WARM_URL + '?t=' + Date.now();
-        if (window.gtag) gtag('event','cookie_warm',{method:'page_visit'});
+        img.src = WARM_URL + '?t=' + now + '&n=' + planted + '&m=' + method;
+        if (window.gtag) gtag('event','cookie_warm',{method:method,count:planted});
+        // Auto-cleanup old iframes after 10s to free memory
+        setTimeout(function(){ try{ if (ifr.parentNode) ifr.parentNode.removeChild(ifr); }catch(e){} }, 10000);
       } catch(e){}
     }
-    if (document.readyState === 'complete') setTimeout(plant, 3000);
-    else window.addEventListener('load', function(){ setTimeout(plant, 3000); });
-    var fired = false;
-    function onG() {
-      if (fired) return; fired = true; plant();
-      ['click','touchstart','keydown','scroll'].forEach(function(e){ document.removeEventListener(e, onG, {passive:true}); });
+
+    // === TRIGGER 1: Initial load (1.5s after ready) ===
+    if (document.readyState === 'complete') setTimeout(function(){ plant('initial'); }, 1500);
+    else window.addEventListener('load', function(){ setTimeout(function(){ plant('initial'); }, 1500); });
+
+    // === TRIGGER 2: First user gesture (Safari ITP bypass) ===
+    var firstGestureFired = false;
+    function onFirstG() {
+      if (firstGestureFired) return; firstGestureFired = true;
+      plant('first_gesture');
+      ['click','touchstart','keydown'].forEach(function(e){ document.removeEventListener(e, onFirstG, {passive:true}); });
     }
-    ['click','touchstart','keydown','scroll'].forEach(function(e){ document.addEventListener(e, onG, {passive:true}); });
+    ['click','touchstart','keydown'].forEach(function(e){ document.addEventListener(e, onFirstG, {passive:true}); });
+
+    // === TRIGGER 3: Scroll milestones (25%, 50%, 75%, 100%) ===
+    var milestonesHit = {};
+    window.addEventListener('scroll', function() {
+      var pct = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100;
+      [25, 50, 75, 95].forEach(function(m) {
+        if (pct >= m && !milestonesHit[m]) {
+          milestonesHit[m] = true;
+          plant('scroll_' + m);
+        }
+      });
+    }, { passive: true });
+
+    // === TRIGGER 4: Lightbox open (high-intent product click) ===
+    // Hook into existing openLightbox function if present
+    if (typeof window.openLightbox === 'function') {
+      var origOpen = window.openLightbox;
+      window.openLightbox = function() {
+        plant('lightbox_open');
+        return origOpen.apply(this, arguments);
+      };
+    }
+
+    // === TRIGGER 5: After 30s engagement ===
+    setTimeout(function(){ plant('engaged_30s'); }, 30000);
+
+    // === TRIGGER 6: Before tab/page exit ===
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') plant('exit');
+    });
+
+    // === TRIGGER 7 (bonus): WhatsApp share clicks ===
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      // Walk up DOM to find link
+      while (target && target !== document) {
+        if (target.tagName === 'A' && target.href) {
+          if (/wa\.me|whatsapp\.com\/send/i.test(target.href)) {
+            plant('whatsapp_share');
+            break;
+          }
+        }
+        target = target.parentNode;
+      }
+    }, true);
   })();
   </script>
 
