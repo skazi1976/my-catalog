@@ -1425,6 +1425,19 @@
                         }
                     });
                     buildBrandChips();
+                    // Deep link into a search: #search=adidas or ?q=adidas
+                    // Used by the alifindme brand hand-off, so a brand lead can be
+                    // answered with a link that opens this catalogue already filtered.
+                    var deepQ = '';
+                    try {
+                        var h = window.location.hash || '';
+                        if (h.indexOf('#search=') === 0) deepQ = decodeURIComponent(h.slice(8));
+                        if (!deepQ) deepQ = new URLSearchParams(window.location.search).get('q') || '';
+                    } catch (e) {}
+                    if (deepQ) {
+                        var sb = document.getElementById('searchBox');
+                        if (sb) sb.value = deepQ;
+                    }
                     filterProducts();
                     // Direct product link via hash
                     var hash = window.location.hash;
@@ -1682,6 +1695,11 @@
             const resolved = query ? resolveSearchQuery(query) : null;
             const isCategory = resolved && resolved.category;
             const aliasTerms = isCategory ? null : (Array.isArray(resolved) ? resolved : null);
+            // A 2-3 letter latin query is a brand code, not a word fragment.
+            let shortCodeRe = null;
+            if (!isCategory && /^[a-z]{2,3}$/.test(query)) {
+                shortCodeRe = new RegExp("(?:^|[^a-z])" + query + "(?![a-z])");
+            }
 
             filteredIndices = [];
             PRODUCTS.forEach((p, i) => {
@@ -1693,6 +1711,14 @@
                 } else if (isCategory) {
                     // Category search: match by product category field
                     matchSearch = (p.c === resolved.category);
+                } else if (shortCodeRe) {
+                    // Short brand codes (lv, ck, mk, tnf...) are substrings of ordinary
+                    // words — "ck" matches black/jacket/backpack — so they only count
+                    // as a whole word, and only in the title (never the URL field).
+                    matchSearch = shortCodeRe.test(titleText);
+                    if (!matchSearch && aliasTerms) {
+                        matchSearch = aliasTerms.some(term => titleText.includes(term));
+                    }
                 } else {
                     matchSearch = searchText.includes(query);
                     // For alias matches, search title only to avoid URL false matches
