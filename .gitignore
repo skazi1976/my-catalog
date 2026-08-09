@@ -1,1 +1,7 @@
-images/ 
+images/
+
+# Session backups and env files carry live API keys — never commit them.
+session_backup_*.md
+*.env
+.env
+Gemini_Generated_Image*
