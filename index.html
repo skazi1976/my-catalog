@@ -1854,6 +1854,13 @@
         }
         window.addEventListener('hashchange', function() {
             var hash = window.location.hash;
+            // #search= arriving on an already-open tab (a second link from WhatsApp)
+            // changes only the hash, so the load-time handler never re-runs.
+            if (hash && hash.indexOf('#search=') === 0) {
+                var sb2 = document.getElementById('searchBox');
+                if (sb2) { sb2.value = decodeURIComponent(hash.slice(8)); filterProducts(); }
+                return;
+            }
             if (hash && hash.startsWith('#product=')) {
                 var albumId = hash.replace('#product=', '');
                 var idx = findProductByAlbumId(albumId);
