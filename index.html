@@ -2003,13 +2003,9 @@
             // Show/hide chat button based on store
             var store = getStore(product);
             var chatBtn = document.getElementById('lbChatBtn');
-            if (store === 'xuxuxuxux' || store === 'TOP-B111' || store === 'zad2025' || store === 'ldan2025') {
-                chatBtn.style.display = '';
-                chatBtn.dataset.store = store;
-                chatBtn.dataset.title = (title || '').substring(0, 60);
-            } else {
-                chatBtn.style.display = 'none';
-            }
+            chatBtn.style.display = '';
+            chatBtn.dataset.store = store || 'catalog';
+            chatBtn.dataset.title = (title || '').substring(0, 60);
 
             var albumId = getProductId(product, productIndex);
             if (albumId) history.replaceState(null, '', '#product=' + albumId);
@@ -2682,6 +2678,8 @@
 <!-- Seller Contact System -->
 <script type="text/javascript">
 var SELLER_API = 'https://ali-findme-api.ohadf1976.workers.dev';
+// כל פניות "צור קשר עם המוכר" מגיעות לוואטסאפ הזה
+var CONTACT_WA = '972502373019';
 
 // Store mapping loaded from stores.json
 var STORE_MAP = {};
@@ -2718,8 +2716,7 @@ function addChatButtons() {
         var pi = parseInt(card.dataset.pi);
         if (!info || isNaN(pi) || !PRODUCTS[pi]) return;
 
-        var store = getStore(PRODUCTS[pi]);
-        if (!store) return;
+        var store = getStore(PRODUCTS[pi]) || 'catalog';
 
         var btn = document.createElement('button');
         btn.className = 'chat-seller-btn';
@@ -2729,7 +2726,36 @@ function addChatButtons() {
     });
 }
 
-// Shared email form function
+// פנייה למוכר => הודעת וואטסאפ אלינו עם פרטי הפריט
+function openWhatsAppContact(store, title, productLink, price) {
+    var cleanTitle = (title || '').replace(/\s+/g, ' ').trim();
+
+    var msg = 'היי! 👋 מתעניין/ת בפריט מהקטלוג:\n\n';
+    if (cleanTitle) msg += '*' + cleanTitle + '*\n';
+    if (price) msg += 'מחיר: ' + price + '\n';
+    if (productLink) msg += productLink + '\n';
+    if (store) msg += '\n_(' + store + ')_';
+
+    // דיווח לאנליטיקס
+    try {
+        var payload = JSON.stringify({ type: 'contact', query: cleanTitle.substring(0, 60), referrer: document.referrer || '' });
+        var TU = 'https://catalog-analytics.ohadf1976.workers.dev/track';
+        navigator.sendBeacon ? navigator.sendBeacon(TU, payload)
+            : fetch(TU, { method: 'POST', body: payload, headers: { 'Content-Type': 'application/json' }, keepalive: true });
+    } catch (e) {}
+    try {
+        fetch(SELLER_API + '/seller/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ store: store, event: 'contact', product: cleanTitle.substring(0, 60) })
+        }).catch(function () {});
+    } catch (e) {}
+    if (typeof fbq === 'function') fbq('track', 'Contact', { content_name: cleanTitle });
+
+    window.open('https://wa.me/' + CONTACT_WA + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Shared email form function (לא בשימוש - הוחלף בוואטסאפ)
 function showEmailForm(store, title, productLink, buyLink) {
     var existing = document.getElementById('chatEmailOverlay');
     if (existing) existing.remove();
@@ -2807,21 +2833,27 @@ document.addEventListener('click', function(e) {
     var store = btn.dataset.store;
     var card = btn.closest('.product-card');
     var title = card ? (card.querySelector('.card-title') || {}).textContent || '' : '';
-    var cardIdx = card ? parseInt(card.dataset.idx) : -1;
-    var buyLink = (cardIdx >= 0 && PRODUCTS[cardIdx]) ? PRODUCTS[cardIdx].l : '';
-    var productLink = cardIdx >= 0 ? 'https://hacatalog.com/#product=' + getProductId(PRODUCTS[cardIdx], cardIdx) : window.location.href;
+    var cardIdx = card ? parseInt(card.dataset.pi) : NaN;
+    var hasProduct = !isNaN(cardIdx) && PRODUCTS[cardIdx];
+    var price = hasProduct ? (PRODUCTS[cardIdx].p || '') : '';
+    var productLink = hasProduct
+        ? 'https://hacatalog.com/#product=' + getProductId(PRODUCTS[cardIdx], cardIdx)
+        : window.location.href;
 
-    showEmailForm(store, title, productLink, buyLink);
+    openWhatsAppContact(store, title, productLink, price);
 });
 
 // Open chat from lightbox - uses shared email form
 function openSellerChat() {
     var chatBtn = document.getElementById('lbChatBtn');
-    var store = chatBtn.dataset.store || 'xuxuxuxux';
-    var title = chatBtn.dataset.title || '';
-    var productLink = window.location.href;
-    var buyLink = PRODUCTS[currentProductIndex] ? PRODUCTS[currentProductIndex].l : '';
-    showEmailForm(store, title, productLink, buyLink);
+    var store = chatBtn.dataset.store || 'catalog';
+    var p = PRODUCTS[currentProductIndex];
+    var title = (p && p.t) || chatBtn.dataset.title || '';
+    var price = (p && p.p) || '';
+    var productLink = p
+        ? 'https://hacatalog.com/#product=' + getProductId(p, currentProductIndex)
+        : window.location.href;
+    openWhatsAppContact(store, title, productLink, price);
 }
 
 // Inject buttons after products load
